@@ -140,7 +140,7 @@ class Lift(SingleArmEnv):
         controller_configs=None,
         gripper_types="default",
         initialization_noise="default",
-        table_full_size=(0.8, 0.8, 0.05),
+        table_full_size=(1., 1., 0.05),
         table_friction=(1.0, 5e-3, 1e-4),
         use_camera_obs=True,
         use_object_obs=True,
@@ -164,6 +164,7 @@ class Lift(SingleArmEnv):
         camera_segmentations=None,  # {None, instance, class, element}
         renderer="mujoco",
         renderer_config=None,
+        mount_type=None
     ):
         # settings for table top
         self.table_full_size = table_full_size
@@ -179,12 +180,14 @@ class Lift(SingleArmEnv):
 
         # object placement initializer
         self.placement_initializer = placement_initializer
+        self.mount_type = mount_type
 
         super().__init__(
             robots=robots,
             env_configuration=env_configuration,
             controller_configs=controller_configs,
-            mount_types="default",
+            # mount_types="default",
+            mount_types=mount_type,
             gripper_types=gripper_types,
             initialization_noise=initialization_noise,
             use_camera_obs=use_camera_obs,
@@ -266,6 +269,10 @@ class Lift(SingleArmEnv):
 
         # Adjust base pose accordingly
         xpos = self.robots[0].robot_model.base_xpos_offset["table"](self.table_full_size[0])
+        if self.mount_type is None:
+            xpos = np.array([xpos[0]+0.3, 0, self.table_offset[2]])
+        else:
+            xpos = self.robots[0].robot_model.base_xpos_offset["table"](self.table_full_size[0])
         self.robots[0].robot_model.set_base_xpos(xpos)
 
         # load model for table top workspace
