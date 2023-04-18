@@ -489,7 +489,7 @@ class PickPlace(SingleArmEnv):
         self.bin_size = mujoco_arena.table_full_size
 
         self.objects = []
-        self.visual_objects = []
+        nelf.visual_objects = []
         for vis_obj_cls, obj_name in zip(
             (MilkVisualObject, BreadVisualObject, CerealVisualObject, CanVisualObject),
             self.obj_names,

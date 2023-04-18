@@ -4,15 +4,15 @@ import numpy as np
 
 from robosuite.environments.manipulation.single_arm_env import SingleArmEnv
 from robosuite.models.arenas import TableArena
-from robosuite.models.objects import BoxObject
+from robosuite.models.objects import BoxObject, CylinderObject
 from robosuite.models.tasks import ManipulationTask
 from robosuite.utils.mjcf_utils import CustomMaterial
 from robosuite.utils.observables import Observable, sensor
-from robosuite.utils.placement_samplers import UniformRandomSampler
+from robosuite.utils.placement_samplers import UniformRandomSampler, SequentialCompositeSampler
 from robosuite.utils.transform_utils import convert_quat
 
 
-class Lift(SingleArmEnv):
+class Push(SingleArmEnv):
     """
     This class corresponds to the lifting task for a single robot arm.
 
@@ -57,7 +57,7 @@ class Lift(SingleArmEnv):
 
         use_camera_obs (bool): if True, every observation includes rendered image(s)
 
-        use_object_obs (bool): if True, include object (cube) information in
+        use_object_obs (bool): if True, include object (cylinder) information in
             the observation.
 
         reward_scale (None or float): Scales the normalized reward function by the amount specified.
@@ -216,13 +216,13 @@ class Lift(SingleArmEnv):
 
         Sparse un-normalized reward:
 
-            - a discrete reward of 2.25 is provided if the cube is lifted
+            - a discrete reward of 2.25 is provided if the cylinder is lifted
 
         Un-normalized summed components if using reward shaping:
 
-            - Reaching: in [0, 1], to encourage the arm to reach the cube
-            - Grasping: in {0, 0.25}, non-zero if arm is grasping the cube
-            - Lifting: in {0, 1}, non-zero if arm has lifted the cube
+            - Reaching: in [0, 1], to encourage the arm to reach the cylinder
+            - Grasping: in {0, 0.25}, non-zero if arm is grasping the cylinder
+            - Lifting: in {0, 1}, non-zero if arm has lifted the cylinder
 
         The sparse reward only consists of the lifting component.
 
@@ -239,31 +239,26 @@ class Lift(SingleArmEnv):
 
         # sparse completion reward
         if self._check_success():
-            reward = 2.25
+            reward = 2.
 
         # use a shaping reward
         elif self.reward_shaping:
 
             # reaching reward
-            cube_pos = self.sim.data.body_xpos[self.cube_body_id]
+            cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
             gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
-            dist = np.linalg.norm(gripper_site_pos - cube_pos)
+            dist = np.linalg.norm(gripper_site_pos - cylinder_pos)
             reaching_reward = 1 - np.tanh(10.0 * dist)
             reward += reaching_reward
 
-            # grasping reward
-            if self._check_grasp(gripper=self.robots[0].gripper, object_geoms=self.cube):
-                reward += 0.25
-
-            # lift reward
-            cube_height = self.sim.data.body_xpos[self.cube_body_id][2]
-            desired_height = self.model.mujoco_arena.table_offset[2] + 0.04
-            lifting_reward = 1 - np.tanh(15.0 * (desired_height - cube_height))
-            reward += lifting_reward
+            goal_pos = self.sim.data.body_xpos[self.goal_body_id]
+            dist = np.linalg.norm(cylinder_pos - goal_pos)
+            pushing_reward = 1 - np.tanh(15.0 * dist)
+            reward += pushing_reward
 
         # Scale reward if requested
         if self.reward_scale is not None:
-            reward *= self.reward_scale / 2.25
+            reward *= self.reward_scale / 2.
 
         return reward
 
@@ -307,36 +302,60 @@ class Lift(SingleArmEnv):
             tex_attrib=tex_attrib,
             mat_attrib=mat_attrib,
         )
-        self.cube = BoxObject(
-            name="cube",
-            size_min=[0.020, 0.020, 0.020],  # [0.015, 0.015, 0.015],
-            size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
+
+        self.cylinder = CylinderObject(
+            name='cylinder',
+            size_min=[0.04, 0.02],  # [0.015, 0.015, 0.015],
+            size_max=[0.042, 0.02],  # [0.018, 0.018, 0.018])
             rgba=[1, 0, 0, 1],
             material=redwood,
+            friction=[3, 0.005, 0.0001],
+            solimp=[0.99, 0.99, 0.01],
+            solref=[0.01, 1]
+        )
+
+        self.goal = CylinderObject(
+            name='goal',
+            joints=None,
+            size_min=[0.04, 0.005],  # [0.015, 0.015, 0.015],
+            size_max=[0.04, 0.005],  # [0.018, 0.018, 0.018])
+            rgba=[0, 1, 0, 1],
+            obj_type='visual',
         )
 
         # Create placement initializer
-        if self.placement_initializer is not None:
-            self.placement_initializer.reset()
-            self.placement_initializer.add_objects(self.cube)
-        else:
-            self.placement_initializer = UniformRandomSampler(
-                name="ObjectSampler",
-                mujoco_objects=self.cube,
-                x_range=[-0.03, 0.03],
-                y_range=[-0.03, 0.03],
+        self.placement_initializer = SequentialCompositeSampler(name="ObjectSampler")
+        self.placement_initializer.append_sampler(UniformRandomSampler(
+            name="ObjectSampler",
+            mujoco_objects=self.cylinder,
+            x_range=[-0.1, -0.05],
+            y_range=[-0.03, 0.03],
+            rotation=None,
+            ensure_object_boundary_in_range=False,
+            ensure_valid_placement=True,
+            reference_pos=self.table_offset,
+            z_offset=0.0,
+        ))
+
+        self.placement_initializer.append_sampler(UniformRandomSampler(
+                name="GoalSampler",
+                mujoco_objects=self.goal,
+                x_range=[0.1, 0.15],
+                y_range=[-0.01, 0.01],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,
                 reference_pos=self.table_offset,
-                z_offset=0.01,
+                z_offset=0.0,
             )
+        )
 
         # task includes arena, robot, and objects of interest
         self.model = ManipulationTask(
             mujoco_arena=mujoco_arena,
             mujoco_robots=[robot.robot_model for robot in self.robots],
-            mujoco_objects=self.cube,
+            mujoco_objects=[self.cylinder, self.goal],
+            # mujoco_objects=self.cylinder,
         )
 
     def _setup_references(self):
@@ -348,7 +367,8 @@ class Lift(SingleArmEnv):
         super()._setup_references()
 
         # Additional object references from this env
-        self.cube_body_id = self.sim.model.body_name2id(self.cube.root_body)
+        self.cylinder_body_id = self.sim.model.body_name2id(self.cylinder.root_body)
+        self.goal_body_id = self.sim.model.body_name2id(self.goal.root_body)
 
     def _setup_observables(self):
         """
@@ -365,24 +385,38 @@ class Lift(SingleArmEnv):
             pf = self.robots[0].robot_model.naming_prefix
             modality = "object"
 
-            # cube-related observables
+            # cylinder-related observables
             @sensor(modality=modality)
-            def cube_pos(obs_cache):
-                return np.array(self.sim.data.body_xpos[self.cube_body_id])
+            def cylinder_pos(obs_cache):
+                return np.array(self.sim.data.body_xpos[self.cylinder_body_id])
 
             @sensor(modality=modality)
-            def cube_quat(obs_cache):
-                return convert_quat(np.array(self.sim.data.body_xquat[self.cube_body_id]), to="xyzw")
+            def cylinder_quat(obs_cache):
+                return convert_quat(np.array(self.sim.data.body_xquat[self.cylinder_body_id]), to="xyzw")
 
             @sensor(modality=modality)
-            def gripper_to_cube_pos(obs_cache):
+            def gripper_to_cylinder_pos(obs_cache):
                 return (
-                    obs_cache[f"{pf}eef_pos"] - obs_cache["cube_pos"]
-                    if f"{pf}eef_pos" in obs_cache and "cube_pos" in obs_cache
+                    obs_cache[f"{pf}eef_pos"] - obs_cache["cylinder_pos"]
+                    if f"{pf}eef_pos" in obs_cache and "cylinder_pos" in obs_cache
                     else np.zeros(3)
                 )
 
-            sensors = [cube_pos, cube_quat, gripper_to_cube_pos]
+            modality = 'goal'
+
+            @sensor(modality=modality)
+            def goal_pos(obs_cache):
+                return np.array(self.sim.data.body_xpos[self.goal_body_id])
+
+            @sensor(modality=modality)
+            def object_to_goal_pos(obs_cache):
+                return (
+                    obs_cache["cylinder_pos"][:2] - obs_cache["goal_pos"][:2]
+                    if "goal_pos" in obs_cache and "cylinder_pos" in obs_cache
+                    else np.zeros(3)
+                )
+
+            sensors = [cylinder_pos, cylinder_quat, gripper_to_cylinder_pos, goal_pos, object_to_goal_pos]
             names = [s.__name__ for s in sensors]
 
             # Create observables
@@ -409,11 +443,15 @@ class Lift(SingleArmEnv):
 
             # Loop through all objects and reset their positions
             for obj_pos, obj_quat, obj in object_placements.values():
-                self.sim.data.set_joint_qpos(obj.joints[0], np.concatenate([np.array(obj_pos), np.array(obj_quat)]))
+                if 'cylinder' in obj.name.lower():
+                    self.sim.data.set_joint_qpos(obj.joints[0], np.concatenate([np.array(obj_pos), np.array(obj_quat)]))
+                else:
+                    self.sim.model.body_pos[self.goal_body_id] = obj_pos
+                    self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def visualize(self, vis_settings):
         """
-        In addition to super call, visualize gripper site proportional to the distance to the cube.
+        In addition to super call, visualize gripper site proportional to the distance to the cylinder.
 
         Args:
             vis_settings (dict): Visualization keywords mapped to T/F, determining whether that specific
@@ -423,19 +461,18 @@ class Lift(SingleArmEnv):
         # Run superclass method first
         super().visualize(vis_settings=vis_settings)
 
-        # Color the gripper visualization site according to its distance to the cube
+        # Color the gripper visualization site according to its distance to the cylinder
         if vis_settings["grippers"]:
-            self._visualize_gripper_to_target(gripper=self.robots[0].gripper, target=self.cube)
+            self._visualize_gripper_to_target(gripper=self.robots[0].gripper, target=self.cylinder)
 
     def _check_success(self):
         """
-        Check if cube has been lifted.
+        Check if cylinder has been lifted.
 
         Returns:
-            bool: True if cube has been lifted
+            bool: True if cylinder has been lifted
         """
-        cube_height = self.sim.data.body_xpos[self.cube_body_id][2]
-        table_height = self.model.mujoco_arena.table_offset[2]
-
-        # cube is higher than the table top above a margin
-        return cube_height > table_height + 0.04
+        cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
+        goal_pos = self.sim.data.body_xpos[self.goal_body_id]
+        dist = np.linalg.norm(cylinder_pos[:2]-goal_pos[:2])
+        return dist < 0.04
