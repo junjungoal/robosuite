@@ -271,7 +271,7 @@ class Push(SingleArmEnv):
         # Adjust base pose accordingly
         xpos = self.robots[0].robot_model.base_xpos_offset["table"](self.table_full_size[0])
         if self.mount_type is None:
-            xpos = np.array([-0.66, 0, self.table_offset[2]])
+            xpos = np.array([-0.56, 0, self.table_offset[2]])
         else:
             xpos = self.robots[0].robot_model.base_xpos_offset["table"](self.table_full_size[0])
         self.robots[0].robot_model.set_base_xpos(xpos)
@@ -328,7 +328,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
-            x_range=[0.0, 0.05],
+            x_range=[-0.03, 0.03],
             y_range=[-0.03, 0.03],
             rotation=None,
             ensure_object_boundary_in_range=False,
@@ -340,8 +340,8 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
                 name="GoalSampler",
                 mujoco_objects=self.goal,
-                x_range=[0.2, 0.2],
-                y_range=[0.2, 0.2],
+                x_range=[0.15, 0.2],
+                y_range=[-0.05, 0.05],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,
