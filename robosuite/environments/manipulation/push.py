@@ -306,10 +306,10 @@ class Push(SingleArmEnv):
         self.cylinder = CylinderObject(
             name='cylinder',
             size_min=[0.04, 0.02],  # [0.015, 0.015, 0.015],
-            size_max=[0.042, 0.02],  # [0.018, 0.018, 0.018])
+            size_max=[0.04, 0.02],  # [0.018, 0.018, 0.018])
             rgba=[1, 0, 0, 1],
             material=redwood,
-            friction=[3, 0.005, 0.0001],
+            friction=[1, 0.005, 0.0001],
             solimp=[0.99, 0.99, 0.01],
             solref=[0.01, 1]
         )
@@ -328,7 +328,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
-            x_range=[-0.03, 0.03],
+            x_range=[-0.03, 0.0],
             y_range=[-0.03, 0.03],
             rotation=None,
             ensure_object_boundary_in_range=False,
@@ -340,7 +340,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
                 name="GoalSampler",
                 mujoco_objects=self.goal,
-                x_range=[0.13, 0.18],
+                x_range=[0.1, 0.1],
                 y_range=[-0.05, 0.05],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
@@ -479,4 +479,4 @@ class Push(SingleArmEnv):
         cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
         goal_pos = self.sim.data.body_xpos[self.goal_body_id]
         dist = np.linalg.norm(cylinder_pos[:2]-goal_pos[:2])
-        return dist < 0.04
+        return dist < 0.01
