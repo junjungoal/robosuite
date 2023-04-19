@@ -449,6 +449,10 @@ class Push(SingleArmEnv):
                     self.sim.model.body_pos[self.goal_body_id] = obj_pos
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
+    def step(self, action):
+        action = np.concatenate([action, np.array([1])])
+        return super().step(action)
+
     def visualize(self, vis_settings):
         """
         In addition to super call, visualize gripper site proportional to the distance to the cylinder.
