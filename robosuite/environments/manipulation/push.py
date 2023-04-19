@@ -328,7 +328,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
-            x_range=[-0.1, -0.05],
+            x_range=[0.0, 0.05],
             y_range=[-0.03, 0.03],
             rotation=None,
             ensure_object_boundary_in_range=False,
@@ -340,8 +340,8 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
                 name="GoalSampler",
                 mujoco_objects=self.goal,
-                x_range=[0.1, 0.15],
-                y_range=[-0.01, 0.01],
+                x_range=[0.2, 0.2],
+                y_range=[0.2, 0.2],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,
