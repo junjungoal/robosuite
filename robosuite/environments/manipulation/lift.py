@@ -255,11 +255,12 @@ class Lift(SingleArmEnv):
             if self._check_grasp(gripper=self.robots[0].gripper, object_geoms=self.cube):
                 reward += 0.25
 
-            # lift reward
-            cube_height = self.sim.data.body_xpos[self.cube_body_id][2]
-            desired_height = self.model.mujoco_arena.table_offset[2] + 0.04
-            lifting_reward = 1 - np.tanh(15.0 * (desired_height - cube_height))
-            reward += lifting_reward
+                # lift reward
+                cube_height = self.sim.data.body_xpos[self.cube_body_id][2]
+                desired_height = self.model.mujoco_arena.table_offset[2] + 0.04
+                z_dist = np.maximum(desired_height - cube_height, 0)
+                lifting_reward = 1 - np.tanh(5.0 * (z_dist/ 0.04))
+                reward += lifting_reward
 
         # Scale reward if requested
         if self.reward_scale is not None:
