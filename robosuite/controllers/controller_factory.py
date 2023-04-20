@@ -134,7 +134,7 @@ def controller_factory(name, params):
         params["control_ori"] = False
         return OperationalSpaceController(interpolator_pos=interpolator, **params)
 
-    if name == "IK_POSE":
+    if name == "IK_POSE" or name == 'IK_POSITION' or name == 'IK_POSITION_Z':
         ori_interpolator = None
         if interpolator is not None:
             interpolator.set_states(dim=3)  # EE IK control uses dim 3 for pos and dim 4 for ori

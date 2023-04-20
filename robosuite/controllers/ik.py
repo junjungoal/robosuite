@@ -138,6 +138,8 @@ class InverseKinematicsController(JointVelocityController):
         interpolator_pos=None,
         interpolator_ori=None,
         converge_steps=5,
+        use_ori=True,
+        use_z_ori=False,
         **kwargs,
     ):
 
@@ -167,7 +169,12 @@ class InverseKinematicsController(JointVelocityController):
         self.robot_name = robot_name  # Name of robot (e.g.: "Panda", "Sawyer", etc.)
 
         # Override underlying control dim
-        self.control_dim = 6
+        self.use_ori = use_ori
+        self.use_z_ori = use_z_ori
+        self.control_dim = 6 if self.use_ori else 3
+        if self.use_z_ori:
+            self.control_dim += 1
+        self.name_suffix = "Pose" if self.use_ori else "Position"
 
         # Rotation offsets (for mujoco eef -> pybullet eef) and rest poses
         self.eef_rot_offset = eef_rot_offset
@@ -396,7 +403,7 @@ class InverseKinematicsController(JointVelocityController):
 
         return T.mat2pose(eef_pose_in_base)
 
-    def get_control(self, dpos=None, rotation=None, update_targets=False):
+    def get_control(self, dpos=None, rotation=None, desired_rotation=None, z_rot=None, update_targets=False):
         """
         Returns joint velocities to control the robot after the target end effector
         position and orientation are updated from arguments @dpos and @rotation.
@@ -421,7 +428,16 @@ class InverseKinematicsController(JointVelocityController):
             self.commanded_joint_positions = np.array(
                 self.joint_positions_for_eef_command(dpos, rotation, update_targets)
             )
+        else:
+            self.commanded_joint_positions = np.array(
+                self.joint_positions_for_eef_command(dpos, desired_rotation=desired_rotation, update_targets=update_targets)
+            )
 
+
+        if z_rot is not None:
+            # self.commanded_joint_positions[-1] += z_rot
+            self.commanded_joint_positions[-1] = self.joint_pos[-1]
+            self.commanded_joint_positions[-1] += z_rot
         # P controller from joint positions (from IK) to velocities
         velocities = np.zeros(self.joint_dim)
         deltas = self._get_current_error(self.joint_pos, self.commanded_joint_positions)
@@ -461,7 +477,7 @@ class InverseKinematicsController(JointVelocityController):
         )
         return list(np.array(ik_solution)[self.ik_command_indexes])
 
-    def joint_positions_for_eef_command(self, dpos, rotation, update_targets=False):
+    def joint_positions_for_eef_command(self, dpos, rotation=None, desired_rotation=None, update_targets=False):
         """
         This function runs inverse kinematics to back out target joint positions
         from the provided end effector command.
@@ -479,7 +495,10 @@ class InverseKinematicsController(JointVelocityController):
 
         # Calculate the rotation
         # This equals: inv base offset * eef * offset accounting for deviation between mujoco eef and pybullet eef
-        rotation = self.base_orn_offset_inv @ self.ee_ori_mat @ rotation @ self.rotation_offset[:3, :3]
+        if rotation is not None:
+            rotation = self.base_orn_offset_inv @ self.ee_ori_mat @ rotation @ self.rotation_offset[:3, :3]
+        else:
+            rotation = self.base_orn_offset_inv @ desired_rotation @ self.rotation_offset[:3, :3]
 
         # Determine targets based on whether we're using interpolator(s) or not
         if self.interpolator_pos or self.interpolator_ori:
@@ -560,9 +579,21 @@ class InverseKinematicsController(JointVelocityController):
 
         # Run ik prepropressing to convert pos, quat ori to desired velocities
         requested_control = self._make_input(delta, self.reference_target_orn)
+        dpos = requested_control['dpos']
+        desired_rotation=None
+        rotation = None
+        z_rot = None
+        if self.use_ori:
+            rotation = requested_control['rotation']
+        else:
+            desired_rotation = requested_control['desired_rotation']
+
+        if self.use_z_ori:
+            z_rot = requested_control['z_rot']
 
         # Compute desired velocities to achieve eef pos / ori
-        velocities = self.get_control(**requested_control, update_targets=True)
+        velocities = self.get_control(dpos, rotation=rotation,
+                                      desired_rotation=desired_rotation, z_rot=z_rot, update_targets=True)
 
         # Set the goal velocities for the underlying velocity controller
         super().set_goal(velocities)
@@ -642,7 +673,7 @@ class InverseKinematicsController(JointVelocityController):
         # Sync pybullet state as well
         self.sync_state()
 
-    def _clip_ik_input(self, dpos, rotation):
+    def _clip_ik_input(self, dpos, rotation=None):
         """
         Helper function that clips desired ik input deltas into a valid range.
 
@@ -662,13 +693,16 @@ class InverseKinematicsController(JointVelocityController):
         if dpos.any():
             dpos, _ = T.clip_translation(dpos, self.ik_pos_limit)
 
-        # Map input to quaternion
-        rotation = T.axisangle2quat(rotation)
+        if rotation is not None:
+            # Map input to quaternion
+            rotation = T.axisangle2quat(rotation)
 
-        # Clip orientation to desired magnitude
-        rotation, _ = T.clip_rotation(rotation, self.ik_ori_limit)
+            # Clip orientation to desired magnitude
+            rotation, _ = T.clip_rotation(rotation, self.ik_ori_limit)
 
-        return dpos, rotation
+            return dpos, rotation
+        else:
+            return dpos
 
     def _make_input(self, action, old_quat):
         """
@@ -682,13 +716,25 @@ class InverseKinematicsController(JointVelocityController):
             old_quat (np.array) the old target quaternion that will be updated with the relative change in @action
         """
         # Clip action appropriately
-        dpos, rotation = self._clip_ik_input(action[:3], action[3:])
+        if self.use_ori:
+            dpos, rotation = self._clip_ik_input(action[:3], action[3:])
+            # Update reference targets
+            self.reference_target_orn = T.quat_multiply(old_quat, rotation)
+            self.reference_target_pos += dpos * self.user_sensitivity
+            return {"dpos": dpos * self.user_sensitivity, "rotation": T.quat2mat(rotation)}
+        else:
+            dpos = self._clip_ik_input(action[:3])
+            set_ori = np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]])
+            self.reference_target_orn = T.mat2quat(set_ori)
+            rotation = T.quat_multiply(old_quat, T.quat_inverse(self.reference_target_orn))
+            self.reference_target_pos += dpos * self.user_sensitivity
+            output = {"dpos": dpos * self.user_sensitivity, "desired_rotation": set_ori}
+            if self.use_z_ori:
+                output['z_rot'] = self.ik_ori_limit * action[3]
+            # return {"dpos": dpos * self.user_sensitivity, "rotation": T.quat2mat(rotation)}
+            return output
 
-        # Update reference targets
-        self.reference_target_pos += dpos * self.user_sensitivity
-        self.reference_target_orn = T.quat_multiply(old_quat, rotation)
 
-        return {"dpos": dpos * self.user_sensitivity, "rotation": T.quat2mat(rotation)}
 
     @staticmethod
     def _get_current_error(current, set_point):
@@ -718,9 +764,14 @@ class InverseKinematicsController(JointVelocityController):
                 - (np.array) minimum control values
                 - (np.array) maximum control values
         """
-        max_limit = np.concatenate([self.ik_pos_limit * np.ones(3), self.ik_ori_limit * np.ones(3)])
+        if self.use_ori:
+            max_limit = np.concatenate([self.ik_pos_limit * np.ones(3), self.ik_ori_limit * np.ones(3)])
+        elif self.use_z_ori:
+            max_limit = np.concatenate([self.ik_pos_limit * np.ones(3), self.ik_ori_limit * np.ones(1)])
+        else:
+            max_limit = self.ik_pos_limit * np.ones(3)
         return -max_limit, max_limit
 
     @property
     def name(self):
-        return "IK_POSE"
+        return "IK_" + self.name_suffix
