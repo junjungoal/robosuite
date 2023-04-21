@@ -252,7 +252,7 @@ class Push(SingleArmEnv):
             reward += reaching_reward
 
             goal_pos = self.sim.data.body_xpos[self.goal_body_id]
-            dist = np.linalg.norm(cylinder_pos - goal_pos)
+            dist = np.linalg.norm(cylinder_pos[:2] - goal_pos[:2])
             pushing_reward = 1 - np.tanh(15.0 * dist)
             reward += pushing_reward
 
@@ -305,11 +305,11 @@ class Push(SingleArmEnv):
 
         self.cylinder = CylinderObject(
             name='cylinder',
-            size_min=[0.04, 0.02],  # [0.015, 0.015, 0.015],
-            size_max=[0.04, 0.02],  # [0.018, 0.018, 0.018])
+            size_min=[0.04, 0.03],  # [0.015, 0.015, 0.015],
+            size_max=[0.04, 0.03],  # [0.018, 0.018, 0.018])
             rgba=[1, 0, 0, 1],
             material=redwood,
-            friction=[1, 0.005, 0.0001],
+            friction=[1., 0.005, 0.0001],
             solimp=[0.99, 0.99, 0.01],
             solref=[0.01, 1]
         )
