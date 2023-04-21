@@ -12,6 +12,8 @@ CONTROLLER_INFO = {
     "OSC_POSITION": "Operational Space Control (Position Only)",
     "OSC_POSE": "Operational Space Control (Position + Orientation)",
     "IK_POSE": "Inverse Kinematics Control (Position + Orientation) (Note: must have PyBullet installed)",
+    "IK_POSITION": "Inverse Kinematics Control (Position)",
+    "IK_POSITION_Z": "Inverse Kinematics Control (Position + Z orientation)"
 }
 
 ALL_CONTROLLERS = CONTROLLER_INFO.keys()
