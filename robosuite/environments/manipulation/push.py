@@ -182,6 +182,20 @@ class Push(SingleArmEnv):
         self.placement_initializer = placement_initializer
         self.mount_type = mount_type
 
+        # Robot info
+        robots = list(robots) if type(robots) is list or type(robots) is tuple else [robots]
+        num_robots = len(robots)
+        # Gripper
+        gripper_types = self._input2list(gripper_types, num_robots)
+        robot_configs = [
+            {
+                "gripper_type": gripper_types[idx],
+                "initial_qpos": [0, -np.pi/4., 0, -3*np.pi/4, 0, np.pi/2, np.pi/4]
+            }
+            for idx in range(num_robots)
+        ]
+
+
         super().__init__(
             robots=robots,
             env_configuration=env_configuration,
@@ -208,6 +222,7 @@ class Push(SingleArmEnv):
             camera_segmentations=camera_segmentations,
             renderer=renderer,
             renderer_config=renderer_config,
+            robot_configs=robot_configs
         )
 
     def reward(self, action=None):
@@ -328,7 +343,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
-            x_range=[-0.03, 0.0],
+            x_range=[-0.2, -0.15],
             y_range=[-0.03, 0.03],
             rotation=None,
             ensure_object_boundary_in_range=False,
@@ -340,7 +355,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
                 name="GoalSampler",
                 mujoco_objects=self.goal,
-                x_range=[0.1, 0.1],
+                x_range=[0.05, 0.08],
                 y_range=[-0.05, 0.05],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
@@ -479,4 +494,4 @@ class Push(SingleArmEnv):
         cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
         goal_pos = self.sim.data.body_xpos[self.goal_body_id]
         dist = np.linalg.norm(cylinder_pos[:2]-goal_pos[:2])
-        return dist < 0.01
+        return dist < 0.02

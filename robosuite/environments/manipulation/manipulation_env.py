@@ -142,6 +142,7 @@ class ManipulationEnv(RobotEnv):
         camera_segmentations=None,
         renderer="mujoco",
         renderer_config=None,
+        robot_configs=None
     ):
         # Robot info
         robots = list(robots) if type(robots) is list or type(robots) is tuple else [robots]
@@ -150,13 +151,15 @@ class ManipulationEnv(RobotEnv):
         # Gripper
         gripper_types = self._input2list(gripper_types, num_robots)
 
-        # Robot configurations to pass to super call
-        robot_configs = [
-            {
-                "gripper_type": gripper_types[idx],
-            }
-            for idx in range(num_robots)
-        ]
+        if robot_configs is None:
+            # Robot configurations to pass to super call
+            robot_configs = [
+                {
+                    "gripper_type": gripper_types[idx],
+                }
+                for idx in range(num_robots)
+            ]
+
 
         # Run superclass init
         super().__init__(
