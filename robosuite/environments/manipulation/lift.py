@@ -140,7 +140,7 @@ class Lift(SingleArmEnv):
         controller_configs=None,
         gripper_types="default",
         initialization_noise="default",
-        table_full_size=(1.3, 1.3, 0.05),
+        table_full_size=(1.2, 1.2, 0.05),
         # table_full_size=(0.8, 0.8, 0.05),
         table_friction=(1.0, 5e-3, 1e-4),
         use_camera_obs=True,
@@ -171,7 +171,7 @@ class Lift(SingleArmEnv):
         # settings for table top
         self.table_full_size = table_full_size
         self.table_friction = table_friction
-        self.table_offset = np.array((0, 0, 0.8))
+        self.table_offset = np.array((table_full_size[2]/2.-0.1, 0, 0.8))
 
         # reward configuration
         self.reward_scale = reward_scale
@@ -279,7 +279,7 @@ class Lift(SingleArmEnv):
         # Adjust base pose accordingly
         xpos = self.robots[0].robot_model.base_xpos_offset["table"](self.table_full_size[0])
         if self.mount_type is None:
-            xpos = np.array([-0.56, 0, self.table_offset[2]])
+            xpos = np.array([0., 0, self.table_offset[2]])
         else:
             xpos = self.robots[0].robot_model.base_xpos_offset["table"](self.table_full_size[0])
 
@@ -331,7 +331,8 @@ class Lift(SingleArmEnv):
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,
-                reference_pos=self.table_offset,
+                # reference_pos=self.table_offset,
+                reference_pos=(0, 0, 0.8),
                 z_offset=0.01,
             )
 

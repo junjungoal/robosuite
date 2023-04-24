@@ -126,6 +126,8 @@ if __name__ == "__main__":
     elif args.controller == "osc":
         controller_name = "OSC_POSE"
     else:
+        import pdb
+        pdb.set_trace()
         print("Error: Unsupported controller specified. Must be either 'ik' or 'osc'!")
         raise ValueError
 
@@ -227,6 +229,8 @@ if __name__ == "__main__":
                 elif args.arm == "left":
                     action = np.concatenate([rem_action, action])
                 else:
+                    import pdb
+                    pdb.set_trace()
                     # Only right and left arms supported
                     print(
                         "Error: Unsupported arm specified -- "

@@ -268,6 +268,7 @@ class OperationalSpaceController(Controller):
         )
 
         self.goal_pos =  np.minimum(np.maximum(self.goal_pos, self.ee_min_limit), self.ee_max_limit)
+        print(self.goal_pos)
         if self.interpolator_pos is not None:
             self.interpolator_pos.set_goal(self.goal_pos)
 
