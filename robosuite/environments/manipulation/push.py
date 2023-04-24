@@ -254,7 +254,7 @@ class Push(SingleArmEnv):
 
         # sparse completion reward
         if self._check_success():
-            reward = 2.
+            reward = 3.5
 
         # use a shaping reward
         elif self.reward_shaping:
@@ -263,18 +263,21 @@ class Push(SingleArmEnv):
             cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
             gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
             dist = np.linalg.norm(gripper_site_pos - cylinder_pos)
-            reaching_reward = 1 - np.tanh(10.0 * dist)
+            # reaching_reward = 1 - np.tanh(10.0 * dist)
+            reaching_reward = -dist
             reward += reaching_reward
 
             goal_pos = self.sim.data.body_xpos[self.goal_body_id]
-            dist = np.linalg.norm(cylinder_pos[:2] - goal_pos[:2])
-            pushing_reward = 1 - np.tanh(15.0 * dist)
-            reward += pushing_reward
+            # dist = np.linalg.norm(cylinder_pos[:2] - goal_pos[:2])
+            # pushing_reward = 1 - np.tanh(15.0 * dist)
+            # reward += pushing_reward
+            dist = np.linalg.norm(cylinder_pos - goal_pos)
+            pushing_reward = 1 - np.tanh(5.0 * dist)
+            reward += 2.5 * pushing_reward * (dist < 0.12)
 
         # Scale reward if requested
         if self.reward_scale is not None:
             reward *= self.reward_scale / 2.
-
         return reward
 
     def _load_model(self):
@@ -320,13 +323,14 @@ class Push(SingleArmEnv):
 
         self.cylinder = CylinderObject(
             name='cylinder',
-            size_min=[0.04, 0.03],  # [0.015, 0.015, 0.015],
-            size_max=[0.04, 0.03],  # [0.018, 0.018, 0.018])
-            rgba=[1, 0, 0, 1],
+            size_min=[0.021, 0.042],  # [0.015, 0.015, 0.015],
+            size_max=[0.021, 0.042],  # [0.018, 0.018, 0.018])
+            rgba=[0.4, , 0.84, 0.3],
             material=redwood,
             friction=[1., 0.005, 0.0001],
             solimp=[0.99, 0.99, 0.01],
-            solref=[0.01, 1]
+            solref=[0.01, 1],
+            density=400
         )
 
         self.goal = CylinderObject(
@@ -343,7 +347,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
-            x_range=[-0.2, -0.15],
+            x_range=[-0.15, -0.1],
             y_range=[-0.03, 0.03],
             rotation=None,
             ensure_object_boundary_in_range=False,
