@@ -171,7 +171,7 @@ class Lift(SingleArmEnv):
         # settings for table top
         self.table_full_size = table_full_size
         self.table_friction = table_friction
-        self.table_offset = np.array((table_full_size[2]/2.-0.1, 0, 0.8))
+        self.table_offset = np.array((table_full_size[0]/2.-0.1, 0, 0.8))
 
         # reward configuration
         self.reward_scale = reward_scale
@@ -326,7 +326,7 @@ class Lift(SingleArmEnv):
             self.placement_initializer = UniformRandomSampler(
                 name="ObjectSampler",
                 mujoco_objects=self.cube,
-                x_range=[-0.15, -0.1],
+                x_range=[0.4, 0.45],
                 y_range=[-0.02, 0.02],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
