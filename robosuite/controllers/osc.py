@@ -113,7 +113,7 @@ class OperationalSpaceController(Controller):
         actuator_range,
         input_max=1,
         input_min=-1,
-        output_max=(0.05, 0.05, 0.05, 0.5, 0.5, 0.5),
+        output_max=(0.05, 0.05, 0.05, 0.2, 0.2, 0.2),
         output_min=(-0.05, -0.05, -0.05, -0.5, -0.5, -0.5),
         kp=150,
         damping_ratio=1,
@@ -139,7 +139,7 @@ class OperationalSpaceController(Controller):
         )
         # Determine whether this is pos ori or just pos
         self.use_ori = control_ori
-        self.ee_min_limit = np.array([0.15, -0.4, 0.8])
+        self.ee_min_limit = np.array([0.15, -0.4, 0.83])
         self.ee_max_limit = np.array([0.7, 0.4, 1.3])
 
         # Determine whether we want to use delta or absolute values as inputs
