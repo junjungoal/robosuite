@@ -169,7 +169,8 @@ class Push(SingleArmEnv):
         # settings for table top
         self.table_full_size = table_full_size
         self.table_friction = table_friction
-        self.table_offset = np.array((0, 0, 0.8))
+        # self.table_offset = np.array((0, 0, 0.8))
+        self.table_offset = np.array((table_full_size[0]/2-0.1, 0, 0.8))
 
         # reward configuration
         self.reward_scale = reward_scale
@@ -289,7 +290,7 @@ class Push(SingleArmEnv):
         # Adjust base pose accordingly
         xpos = self.robots[0].robot_model.base_xpos_offset["table"](self.table_full_size[0])
         if self.mount_type is None:
-            xpos = np.array([-0.56, 0, self.table_offset[2]])
+            xpos = np.array([0, 0, self.table_offset[2]])
         else:
             xpos = self.robots[0].robot_model.base_xpos_offset["table"](self.table_full_size[0])
         self.robots[0].robot_model.set_base_xpos(xpos)
@@ -313,20 +314,20 @@ class Push(SingleArmEnv):
             "specular": "0.4",
             "shininess": "0.1",
         }
-        redwood = CustomMaterial(
-            texture="WoodRed",
-            tex_name="redwood",
-            mat_name="redwood_mat",
+        greenwood = CustomMaterial(
+            texture="WoodGreen",
+            tex_name="greenwood",
+            mat_name="greenwood_mat",
             tex_attrib=tex_attrib,
             mat_attrib=mat_attrib,
         )
 
         self.cylinder = CylinderObject(
             name='cylinder',
-            size_min=[0.021, 0.042],  # [0.015, 0.015, 0.015],
-            size_max=[0.021, 0.042],  # [0.018, 0.018, 0.018])
+            size_min=[0.021, 0.021],  # [0.015, 0.015, 0.015],
+            size_max=[0.021, 0.021],  # [0.018, 0.018, 0.018])
             rgba=[0.4, 0.84, 0.3, 1.],
-            material=redwood,
+            material=greenwood,
             friction=[1., 0.005, 0.0001],
             solimp=[0.99, 0.99, 0.01],
             solref=[0.01, 1],
@@ -336,9 +337,9 @@ class Push(SingleArmEnv):
         self.goal = CylinderObject(
             name='goal',
             joints=None,
-            size_min=[0.04, 0.005],  # [0.015, 0.015, 0.015],
-            size_max=[0.04, 0.005],  # [0.018, 0.018, 0.018])
-            rgba=[0, 1, 0, 1],
+            size_min=[0.03, 0.001],  # [0.015, 0.015, 0.015],
+            size_max=[0.03, 0.001],  # [0.018, 0.018, 0.018])
+            rgba=[1, 0, 0, 1],
             obj_type='visual',
         )
 
@@ -347,24 +348,22 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
-            x_range=[-0.15, -0.1],
-            y_range=[-0.03, 0.03],
+            x_range=[0.3, 0.35],
+            y_range=[-0.05, 0.05],
             rotation=None,
             ensure_object_boundary_in_range=False,
             ensure_valid_placement=True,
-            reference_pos=self.table_offset,
             z_offset=0.0,
         ))
 
         self.placement_initializer.append_sampler(UniformRandomSampler(
                 name="GoalSampler",
                 mujoco_objects=self.goal,
-                x_range=[0.05, 0.08],
-                y_range=[-0.05, 0.05],
+                x_range=[0.4, 0.4],
+                y_range=[-0.02, 0.02],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,
-                reference_pos=self.table_offset,
                 z_offset=0.0,
             )
         )
@@ -469,7 +468,7 @@ class Push(SingleArmEnv):
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def step(self, action):
-        action = np.concatenate([action, np.array([1])])
+        # action = np.concatenate([action, np.array([1])])
         return super().step(action)
 
     def visualize(self, vis_settings):

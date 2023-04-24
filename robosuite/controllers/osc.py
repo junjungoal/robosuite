@@ -139,6 +139,8 @@ class OperationalSpaceController(Controller):
         )
         # Determine whether this is pos ori or just pos
         self.use_ori = control_ori
+        self.ee_min_limit = np.array([0.15, -0.4, 0.8])
+        self.ee_max_limit = np.array([0.7, 0.4, 1.3])
 
         # Determine whether we want to use delta or absolute values as inputs
         self.use_delta = control_delta
@@ -265,6 +267,7 @@ class OperationalSpaceController(Controller):
             scaled_delta[:3], self.ee_pos, position_limit=self.position_limits, set_pos=set_pos
         )
 
+        self.goal_pos =  np.minimum(np.maximum(self.goal_pos, self.ee_min_limit), self.ee_max_limit)
         if self.interpolator_pos is not None:
             self.interpolator_pos.set_goal(self.goal_pos)
 
