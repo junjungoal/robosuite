@@ -254,7 +254,7 @@ class Push(SingleArmEnv):
 
         # sparse completion reward
         if self._check_success():
-            reward = 2.
+            reward = 3.5
 
         # use a shaping reward
         elif self.reward_shaping:
@@ -263,17 +263,14 @@ class Push(SingleArmEnv):
             cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
             gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
             dist = np.linalg.norm(gripper_site_pos - cylinder_pos)
-            reaching_reward = 1 - np.tanh(10.0 * dist)
+            # reaching_reward = 1 - np.tanh(10.0 * dist)
+            reaching_reward = -dist
             reward += reaching_reward
 
             goal_pos = self.sim.data.body_xpos[self.goal_body_id]
             dist = np.linalg.norm(cylinder_pos - goal_pos)
-            pushing_reward = 1 - np.tanh(15.0 * dist)
-            reward += pushing_reward
-
-        # Scale reward if requested
-        if self.reward_scale is not None:
-            reward *= self.reward_scale / 2.
+            pushing_reward = 1 - np.tanh(5.0 * dist)
+            reward += 2.5 * pushing_reward * (dist < 0.12)
 
         return reward
 
@@ -326,7 +323,8 @@ class Push(SingleArmEnv):
             material=redwood,
             friction=[1, 0.005, 0.0001],
             solimp=[0.99, 0.99, 0.01],
-            solref=[0.01, 1]
+            solref=[0.01, 1],
+            density=400
         )
 
         self.goal = CylinderObject(
