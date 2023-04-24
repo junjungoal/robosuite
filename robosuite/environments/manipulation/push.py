@@ -325,7 +325,7 @@ class Push(SingleArmEnv):
             name='cylinder',
             size_min=[0.021, 0.042],  # [0.015, 0.015, 0.015],
             size_max=[0.021, 0.042],  # [0.018, 0.018, 0.018])
-            rgba=[0.4, , 0.84, 0.3],
+            rgba=[0.4, 0.84, 0.3, 1.],
             material=redwood,
             friction=[1., 0.005, 0.0001],
             solimp=[0.99, 0.99, 0.01],
