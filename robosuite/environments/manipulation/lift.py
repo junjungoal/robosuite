@@ -304,19 +304,18 @@ class Lift(SingleArmEnv):
             "specular": "0.4",
             "shininess": "0.1",
         }
-        redwood = CustomMaterial(
-            texture="WoodRed",
-            tex_name="redwood",
-            mat_name="redwood_mat",
+        yellowwood = CustomMaterial(
+            texture="WoodYellow",
+            tex_name="yellowwood",
+            mat_name="yellowwood_mat",
             tex_attrib=tex_attrib,
             mat_attrib=mat_attrib,
         )
         self.cube = BoxObject(
             name="cube",
-            size_min=[0.042, 0.042, 0.042],  # [0.015, 0.015, 0.015],
-            size_max=[0.042, 0.042, 0.042],  # [0.018, 0.018, 0.018])
-            rgba=[1, 0.84, 0.25, 1],
-            material=redwood,
+            size_min=[0.019, 0.019, 0.019],  # [0.015, 0.015, 0.015],
+            size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
+            material=yellowwood,
         )
 
         # Create placement initializer
@@ -327,8 +326,8 @@ class Lift(SingleArmEnv):
             self.placement_initializer = UniformRandomSampler(
                 name="ObjectSampler",
                 mujoco_objects=self.cube,
-                x_range=[-0.2, -0.15],
-                y_range=[-0.03, 0.03],
+                x_range=[-0.15, -0.1],
+                y_range=[-0.02, 0.02],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,

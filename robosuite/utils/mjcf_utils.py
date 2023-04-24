@@ -101,6 +101,7 @@ TEXTURE_FILES = {
     "WoodBlue": "blue-wood.png",
     "WoodLight": "light-wood.png",
     "WoodDark": "dark-wood.png",
+    'WoodYellow': "yellow-wood.png",
     "WoodTiles": "wood-tiles.png",
     "WoodPanels": "wood-varnished-panels.png",
     "WoodgrainGray": "gray-woodgrain.png",
