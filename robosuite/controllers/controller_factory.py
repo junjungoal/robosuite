@@ -134,8 +134,6 @@ def controller_factory(name, params):
         params["control_ori"] = False
         return OperationalSpaceController(interpolator_pos=interpolator, **params)
 
-    import pdb
-    pdb.set_trace()
     if name == "IK_POSE" or name == 'IK_POSITION' or name == 'IK_POSITION_Z':
         ori_interpolator = None
         if interpolator is not None:

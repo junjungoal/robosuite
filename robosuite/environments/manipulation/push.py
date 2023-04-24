@@ -317,7 +317,7 @@ class Push(SingleArmEnv):
 
         self.cylinder = CylinderObject(
             name='cylinder',
-            size_min=[0.04, 0.02],  # [0.015, 0.015, 0.015],
+            size_min=[0.04, 0.03],  # [0.015, 0.015, 0.015],
             size_max=[0.04, 0.02],  # [0.018, 0.018, 0.018])
             rgba=[1, 0, 0, 1],
             material=redwood,
@@ -341,7 +341,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
-            x_range=[-0.2, -0.15],
+            x_range=[-0.15, -0.1],
             y_range=[-0.03, 0.03],
             rotation=None,
             ensure_object_boundary_in_range=False,
