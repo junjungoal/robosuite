@@ -65,6 +65,7 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         robot_name,
         actuator_range,
         eef_rot_offset,
+        eef_body_name='robot0_right_hand',
         policy_freq=20,
         load_urdf=True,
         ik_pos_limit=None,
@@ -96,6 +97,10 @@ class DifferentialInverseKinematicsController(JointVelocityController):
 
         # Initialize ik-specific attributes
         self.robot_name = robot_name  # Name of robot (e.g.: "Panda", "Sawyer", etc.)
+        self.eef_body_name = eef_body_name
+
+        # IK method
+        self._ik_params = {"lambda_val": 0.1}
 
         # Override underlying control dim
         self.use_ori = use_ori
@@ -113,8 +118,6 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         # Set the reference robot target pos / orientation (to prevent drift / weird ik numerical behavior over time)
         self.reference_target_pos = self.ee_pos
         self.reference_target_orn = T.mat2quat(self.ee_ori_mat)
-        import pdb
-        pdb.set_trace()
 
         # Interpolator
         self.interpolator_pos = interpolator_pos
@@ -151,7 +154,7 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         self.user_sensitivity = 0.3
 
 
-    def get_control(self, dpos=None, rotation=None, desired_rotation=None, z_rot=None, update_targets=False):
+    def get_control(self, dpos=None, rotation=None, z_rot=None, update_targets=False):
         """
         Returns joint velocities to control the robot after the target end effector
         position and orientation are updated from arguments @dpos and @rotation.
@@ -170,14 +173,9 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         """
 
         # Compute new target joint positions if arguments are provided
-        if (dpos is not None) and (rotation is not None):
-            self.commanded_joint_positions = np.array(
-                self.joint_positions_for_eef_command(dpos, rotation, update_targets)
-            )
-        else:
-            self.commanded_joint_positions = np.array(
-                self.joint_positions_for_eef_command(dpos, desired_rotation=desired_rotation, update_targets=update_targets)
-            )
+        self.commanded_joint_positions = np.array(
+            self.joint_positions_for_eef_command(dpos, rotation, update_targets)
+        )
 
 
         if z_rot is not None:
@@ -207,6 +205,30 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         """
         raise NotImplementedError
 
+    def _compute_delta_dof_pos(self, delta_pose, jacobian):
+        """Computes the change in dos-position that yields the desired change in pose.
+
+        The method uses the Jacobian mapping from joint-space velocities to end-effector velocities
+        to compute the delta-change in the joint-space that moves the robot closer to a desired end-effector
+        position.
+
+        Args:
+            delta_pose : The desired delta pose in shape [N, 3 or 6].
+            jacobian : The geometric jacobian matrix in shape [N, 3 or 6, num-dof]
+
+        Returns:
+            np.array: The desired delta in joint space.
+        """
+        # parameters
+        lambda_val = self._ik_params["lambda_val"]
+        # computation
+        jacobian_T = np.transpose(jacobian, (0, 2, 1))
+        lambda_matrix = (lambda_val**2) * np.eye(jacobian.shape[1])
+        delta_dof_pos = jacobian_T @ np.linalg.inv(jacobian @ jacobian_T + lambda_matrix) @ np.expand_dims(delta_pose, axis=-1)
+        delta_dof_pos = delta_dof_pos.squeeze(-1)
+
+        return delta_dof_pos[0]
+
     def joint_positions_for_eef_command(self, dpos, rotation=None, desired_rotation=None, update_targets=False):
         """
         This function runs inverse kinematics to back out target joint positions
@@ -223,35 +245,14 @@ class DifferentialInverseKinematicsController(JointVelocityController):
             list: A list of size @num_joints corresponding to the target joint angles.
         """
 
-        import pdb
-        pdb.set_trace()
-        # Calculate the rotation
-        # This equals: inv base offset * eef * offset accounting for deviation between mujoco eef and pybullet eef
-        if rotation is not None:
-            rotation = self.base_orn_offset_inv @ self.ee_ori_mat @ rotation @ self.rotation_offset[:3, :3]
-        else:
-            rotation = self.base_orn_offset_inv @ desired_rotation @ self.rotation_offset[:3, :3]
+        jacobian = np.concatenate([self.sim.data.get_body_jacp(self.eef_body_name),
+                                   self.sim.data.get_body_jacr(self.eef_body_name)])[:, self.joint_index]
 
-        # Determine targets based on whether we're using interpolator(s) or not
-        if self.interpolator_pos or self.interpolator_ori:
-            targets = (self.ee_pos + dpos + self.ik_robot_target_pos_offset, T.mat2quat(rotation))
-        else:
-            targets = (self.ik_robot_target_pos + dpos, T.mat2quat(rotation))
-
-        # convert from target pose in base frame to target pose in bullet world frame
-        world_targets = self.bullet_base_pose_to_world_pose(targets)
-
-        # Update targets if required
-        if update_targets:
-            # Scale and increment target position
-            self.ik_robot_target_pos += dpos
-
-            # Convert the desired rotation into the target orientation quaternion
-            self.ik_robot_target_orn = T.mat2quat(rotation)
-
-        # Converge to IK solution
-        arm_joint_pos = None
-        return arm_joint_pos
+        quat = T.mat2quat(rotation)
+        axisangle = T.quat2axisangle(quat)
+        delta_pose = np.concatenate([dpos, axisangle])
+        delta_joint_position = self._compute_delta_dof_pos(delta_pose[None], jacobian[None])
+        return self.joint_pos + delta_joint_position
 
     def set_goal(self, delta, set_ik=None):
         """
@@ -289,17 +290,13 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         desired_rotation=None
         rotation = None
         z_rot = None
-        if self.use_ori:
-            rotation = requested_control['rotation']
-        else:
-            desired_rotation = requested_control['desired_rotation']
+        rotation = requested_control['rotation']
 
         if self.use_z_ori:
             z_rot = requested_control['z_rot']
 
         # Compute desired velocities to achieve eef pos / ori
-        velocities = self.get_control(dpos, rotation=rotation,
-                                      desired_rotation=desired_rotation, z_rot=z_rot, update_targets=True)
+        velocities = self.get_control(dpos, rotation=rotation, z_rot=z_rot, update_targets=True)
 
         # Set the goal velocities for the underlying velocity controller
         super().set_goal(velocities)
@@ -422,7 +419,7 @@ class DifferentialInverseKinematicsController(JointVelocityController):
             self.reference_target_orn = T.mat2quat(set_ori)
             rotation = T.quat_multiply(old_quat, T.quat_inverse(self.reference_target_orn))
             self.reference_target_pos += dpos * self.user_sensitivity
-            output = {"dpos": dpos * self.user_sensitivity, "desired_rotation": set_ori}
+            output = {"dpos": dpos * self.user_sensitivity, "rotation": T.quat2mat(rotation)}
             if self.use_z_ori:
                 output['z_rot'] = self.ik_ori_limit * action[3]
             # return {"dpos": dpos * self.user_sensitivity, "rotation": T.quat2mat(rotation)}
