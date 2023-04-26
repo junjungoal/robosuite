@@ -14,7 +14,9 @@ CONTROLLER_INFO = {
     "IK_POSE": "Inverse Kinematics Control (Position + Orientation) (Note: must have PyBullet installed)",
     "IK_POSITION": "Inverse Kinematics Control (Position)",
     "IK_POSITION_Z": "Inverse Kinematics Control (Position + Z orientation)",
-    "DIFFERENTIAL_IK_POSE": "Differential Inverse Kinematics Control"
+    "DIFFERENTIAL_IK_POSE": "Differential Inverse Kinematics Control",
+    "DIFFERENTIAL_IK_POSITION": "Differential Inverse Kinematics Control (Position)",
+    "DIFFERENTIAL_IK_POSITION_Z": "Differential Inverse Kinematics Control (Position)"
 }
 
 ALL_CONTROLLERS = CONTROLLER_INFO.keys()
