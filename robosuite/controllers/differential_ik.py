@@ -1,5 +1,6 @@
 import os
 from os.path import join as pjoin
+import copy
 
 import numpy as np
 
@@ -116,8 +117,8 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         self.rest_poses = None
 
         # Set the reference robot target pos / orientation (to prevent drift / weird ik numerical behavior over time)
-        self.reference_target_pos = self.ee_pos
-        self.reference_target_orn = T.mat2quat(self.ee_ori_mat)
+        self.target_pos = self.ee_pos
+        self.target_orn = T.mat2quat(self.ee_ori_mat)
 
         # Interpolator
         self.interpolator_pos = interpolator_pos
@@ -149,9 +150,8 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         # Commanded pos and resulting commanded vel
         self.commanded_joint_positions = None
         self.commanded_joint_velocities = None
-
-        # Should be in (0, 1], smaller values mean less sensitivity.
-        self.user_sensitivity = 0.3
+        self.ee_min_limit = np.array([0.15, -0.4, 0.83])
+        self.ee_max_limit = np.array([0.7, 0.4, 1.3])
 
 
     def get_control(self, dpos=None, rotation=None, z_rot=None, update_targets=False):
@@ -270,25 +270,10 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         # Update state
         self.update()
 
-        # Get requested delta inputs if we're using interpolators
-        (dpos, dquat) = self._clip_ik_input(delta[:3], delta[3:7])
-
-        # Set interpolated goals if necessary
-        if self.interpolator_pos is not None:
-            # Absolute position goal
-            self.interpolator_pos.set_goal(dpos * self.user_sensitivity + self.reference_target_pos)
-
-        if self.interpolator_ori is not None:
-            # Relative orientation goal
-            self.interpolator_ori.set_goal(dquat)  # goal is the relative change in orientation
-            self.ori_ref = np.array(self.ee_ori_mat)  # reference is the current orientation at start
-            self.relative_ori = np.zeros(3)  # relative orientation always starts at 0
 
         # Run ik prepropressing to convert pos, quat ori to desired velocities
-        requested_control = self._make_input(delta, self.reference_target_orn)
+        requested_control = self._make_input(delta)
         dpos = requested_control['dpos']
-        desired_rotation=None
-        rotation = None
         z_rot = None
         rotation = requested_control['rotation']
 
@@ -317,30 +302,8 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         update_velocity_goal = False
 
         # Update interpolated goals if active
-        if self.interpolator_pos is not None:
-            # Linear case
-            if self.interpolator_pos.order == 1:
-                desired_pos = self.interpolator_pos.get_interpolated_goal()
-            else:
-                # Nonlinear case not currently supported
-                pass
-            update_velocity_goal = True
-        else:
-            desired_pos = self.reference_target_pos
-
-        if self.interpolator_ori is not None:
-            # Linear case
-            if self.interpolator_ori.order == 1:
-                # relative orientation based on difference between current ori and ref
-                self.relative_ori = orientation_error(self.ee_ori_mat, self.ori_ref)
-                ori_error = self.interpolator_ori.get_interpolated_goal()
-                rotation = T.quat2mat(ori_error)
-            else:
-                # Nonlinear case not currently supported
-                pass
-            update_velocity_goal = True
-        else:
-            rotation = T.quat2mat(self.reference_target_orn)
+        desired_pos = self.target_pos
+        rotation = T.quat2mat(self.target_orn)
 
         # Only update the velocity goals if we're interpolating
         if update_velocity_goal:
@@ -361,41 +324,10 @@ class DifferentialInverseKinematicsController(JointVelocityController):
         """
         Resets the goal to the current pose of the robot
         """
-        self.reference_target_pos = self.ee_pos
-        self.reference_target_orn = T.mat2quat(self.ee_ori_mat)
+        self.target_pos = self.ee_pos
+        self.target_orn = T.mat2quat(self.ee_ori_mat)
 
-    def _clip_ik_input(self, dpos, rotation=None):
-        """
-        Helper function that clips desired ik input deltas into a valid range.
-
-        Args:
-            dpos (np.array): a 3 dimensional array corresponding to the desired
-                change in x, y, and z end effector position.
-            rotation (np.array): relative rotation in scaled axis angle form (ax, ay, az)
-                corresponding to the (relative) desired orientation of the end effector.
-
-        Returns:
-            2-tuple:
-
-                - (np.array) clipped dpos
-                - (np.array) clipped rotation
-        """
-        # scale input range to desired magnitude
-        if dpos.any():
-            dpos, _ = T.clip_translation(dpos, self.ik_pos_limit)
-
-        if rotation is not None:
-            # Map input to quaternion
-            rotation = T.axisangle2quat(rotation)
-
-            # Clip orientation to desired magnitude
-            rotation, _ = T.clip_rotation(rotation, self.ik_ori_limit)
-
-            return dpos, rotation
-        else:
-            return dpos
-
-    def _make_input(self, action, old_quat):
+    def _make_input(self, action):
         """
         Helper function that returns a dictionary with keys dpos, rotation from a raw input
         array. The first three elements are taken to be displacement in position, and a
@@ -407,22 +339,27 @@ class DifferentialInverseKinematicsController(JointVelocityController):
             old_quat (np.array) the old target quaternion that will be updated with the relative change in @action
         """
         # Clip action appropriately
+        # Get requested delta inputs if we're using interpolators
+        dpos = action[:3] * self.ik_pos_limit
+        rotation = action[3:7] * self.ik_ori_limit
+
+        self.target_pos = self.ee_pos + dpos
+        self.target_pos = np.minimum(np.maximum(self.target_pos, self.ee_min_limit), self.ee_max_limit)
+        dpos = self.target_pos - self.ee_pos
+        current_quat = T.mat2quat(self.ee_ori_mat)
+
         if self.use_ori:
-            dpos, rotation = self._clip_ik_input(action[:3], action[3:])
             # Update reference targets
-            self.reference_target_orn = T.quat_multiply(old_quat, rotation)
-            self.reference_target_pos += dpos * self.user_sensitivity
-            return {"dpos": dpos * self.user_sensitivity, "rotation": T.quat2mat(rotation)}
+            self.target_orn = T.quat_multiply(current_quat, rotation)
+            return {"dpos": dpos, "rotation": T.quat2mat(rotation)}
         else:
-            dpos = self._clip_ik_input(action[:3])
             set_ori = np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, -1.0]])
-            self.reference_target_orn = T.mat2quat(set_ori)
-            rotation = T.quat_multiply(old_quat, T.quat_inverse(self.reference_target_orn))
-            self.reference_target_pos += dpos * self.user_sensitivity
-            output = {"dpos": dpos * self.user_sensitivity, "rotation": T.quat2mat(rotation)}
+            self.target_orn = T.mat2quat(set_ori)
+            # rotation = T.quat_multiply(current_quat, T.quat_inverse(self.target_orn))
+            rotation = T.quat_multiply(self.target_orn, T.quat_inverse(current_quat))
+            output = {"dpos": dpos, "rotation": T.quat2mat(rotation)}
             if self.use_z_ori:
-                output['z_rot'] = self.ik_ori_limit * action[3]
-            # return {"dpos": dpos * self.user_sensitivity, "rotation": T.quat2mat(rotation)}
+                output['z_rot'] = rotation[0]
             return output
 
 
