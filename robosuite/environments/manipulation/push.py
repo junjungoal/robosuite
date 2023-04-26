@@ -269,12 +269,12 @@ class Push(SingleArmEnv):
             reward += reaching_reward
 
             goal_pos = self.sim.data.body_xpos[self.goal_body_id]
-            # dist = np.linalg.norm(cylinder_pos[:2] - goal_pos[:2])
-            # pushing_reward = 1 - np.tanh(15.0 * dist)
-            # reward += pushing_reward
-            dist = np.linalg.norm(cylinder_pos - goal_pos)
-            pushing_reward = 1 - np.tanh(5.0 * dist)
-            reward += 2.5 * pushing_reward * (dist < 0.12)
+            obj_dist = np.linalg.norm(cylinder_pos[:2] - goal_pos[:2])
+            # pushing_reward = 1 - np.tanh(10.0 * dist)
+            # reward += 3.5*pushing_reward
+            # dist = np.linalg.norm(cylinder_pos - goal_pos)
+            pushing_reward = 1 - np.tanh(5.0 * obj_dist)
+            reward += 2.5 * pushing_reward * (dist < 0.07)
 
         # Scale reward if requested
         if self.reward_scale is not None:
@@ -470,7 +470,7 @@ class Push(SingleArmEnv):
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def step(self, action):
-        # action = np.concatenate([action, np.array([1])])
+        action = np.concatenate([action, np.array([1])])
         return super().step(action)
 
     def visualize(self, vis_settings):
