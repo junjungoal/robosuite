@@ -10,8 +10,8 @@ from robosuite.wrappers import Wrapper
 DEFAULT_COLOR_ARGS = {
     "geom_names": None,  # all geoms are randomized
     "randomize_local": True,  # sample nearby colors
-    "randomize_material": True,  # randomize material reflectance / shininess / specular
-    "local_rgb_interpolation": 0.2,
+    "randomize_material": False,  # randomize material reflectance / shininess / specular
+    "local_rgb_interpolation": 0.15,
     "local_material_interpolation": 0.3,
     "texture_variations": ["rgb"],  # all texture variation types
     "randomize_skybox": False,  # by default, randomize skybox too
