@@ -334,12 +334,19 @@ class Push(SingleArmEnv):
             density=100
         )
 
+        redwood = CustomMaterial(
+            texture="WoodRed",
+            tex_name="redwood",
+            mat_name="redwood_mat",
+            tex_attrib=tex_attrib,
+            mat_attrib=mat_attrib,
+        )
         self.goal = CylinderObject(
             name='goal',
             joints=None,
             size_min=[0.03, 0.001],  # [0.015, 0.015, 0.015],
             size_max=[0.03, 0.001],  # [0.018, 0.018, 0.018])
-            rgba=[1, 0, 0, 1],
+            material=redwood,
             obj_type='visual',
         )
 
@@ -470,7 +477,7 @@ class Push(SingleArmEnv):
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def step(self, action):
-        # action = np.concatenate([action, np.array([1])])
+        action = np.concatenate([action, np.array([1])])
         return super().step(action)
 
     def visualize(self, vis_settings):
