@@ -334,12 +334,19 @@ class Push(SingleArmEnv):
             density=100
         )
 
+        redwood = CustomMaterial(
+            texture="WoodRed",
+            tex_name="redwood",
+            mat_name="redwood_mat",
+            tex_attrib=tex_attrib,
+            mat_attrib=mat_attrib,
+        )
         self.goal = CylinderObject(
             name='goal',
             joints=None,
             size_min=[0.03, 0.001],  # [0.015, 0.015, 0.015],
             size_max=[0.03, 0.001],  # [0.018, 0.018, 0.018])
-            rgba=[1, 0, 0, 1],
+            material=redwood,
             obj_type='visual',
         )
 
