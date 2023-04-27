@@ -10,11 +10,11 @@ from robosuite.wrappers import Wrapper
 DEFAULT_COLOR_ARGS = {
     "geom_names": None,  # all geoms are randomized
     "randomize_local": True,  # sample nearby colors
-    "randomize_material": True,  # randomize material reflectance / shininess / specular
-    "local_rgb_interpolation": 0.2,
+    "randomize_material": False,  # randomize material reflectance / shininess / specular
+    "local_rgb_interpolation": 0.15,
     "local_material_interpolation": 0.3,
-    "texture_variations": ["rgb", "checker", "noise", "gradient"],  # all texture variation types
-    "randomize_skybox": True,  # by default, randomize skybox too
+    "texture_variations": ["rgb"],  # all texture variation types
+    "randomize_skybox": False,  # by default, randomize skybox too
 }
 
 DEFAULT_CAMERA_ARGS = {
@@ -31,10 +31,10 @@ DEFAULT_LIGHTING_ARGS = {
     "light_names": None,  # all lights are randomized
     "randomize_position": True,
     "randomize_direction": True,
-    "randomize_specular": True,
-    "randomize_ambient": True,
-    "randomize_diffuse": True,
-    "randomize_active": True,
+    "randomize_specular": False,
+    "randomize_ambient": False,
+    "randomize_diffuse": False,
+    "randomize_active": False,
     "position_perturbation_size": 0.1,
     "direction_perturbation_size": 0.35,
     "specular_perturbation_size": 0.1,

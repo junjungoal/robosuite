@@ -140,8 +140,8 @@ class Push(SingleArmEnv):
         controller_configs=None,
         gripper_types="default",
         initialization_noise="default",
-        table_full_size=(1.2, 1.2, 0.05),
-        table_friction=(1.0, 5e-3, 1e-4),
+        table_full_size=(1.6, 1.6, 0.05),
+        table_friction=(0.8, 5e-3, 1e-4),
         use_camera_obs=True,
         use_object_obs=True,
         reward_scale=1.0,
@@ -328,10 +328,10 @@ class Push(SingleArmEnv):
             size_max=[0.021, 0.021],  # [0.018, 0.018, 0.018])
             rgba=[0.4, 0.84, 0.3, 1.],
             material=greenwood,
-            friction=[0.8, 0.005, 0.0001],
+            friction=[0.6, 0.005, 0.0001],
             solimp=[0.99, 0.99, 0.01],
             solref=[0.01, 1],
-            density=200
+            density=100
         )
 
         self.goal = CylinderObject(
