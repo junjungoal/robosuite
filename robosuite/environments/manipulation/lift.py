@@ -184,6 +184,18 @@ class Lift(SingleArmEnv):
         self.placement_initializer = placement_initializer
         self.mount_type = mount_type
 
+        # Robot info
+        robots = list(robots) if type(robots) is list or type(robots) is tuple else [robots]
+        num_robots = len(robots)
+        gripper_types = self._input2list(gripper_types, num_robots)
+        robot_configs = [
+            {
+                "gripper_type": gripper_types[idx],
+                "initial_qpos": [0, np.pi/8., 0, -5*np.pi/8, 0, np.pi * 3 / 4, np.pi/4]
+            }
+            for idx in range(num_robots)
+        ]
+
         super().__init__(
             robots=robots,
             env_configuration=env_configuration,
@@ -210,6 +222,7 @@ class Lift(SingleArmEnv):
             camera_segmentations=camera_segmentations,
             renderer=renderer,
             renderer_config=renderer_config,
+            robot_configs=robot_configs
         )
 
     def reward(self, action=None):

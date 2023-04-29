@@ -191,7 +191,7 @@ class Push(SingleArmEnv):
         robot_configs = [
             {
                 "gripper_type": gripper_types[idx],
-                "initial_qpos": [0, -np.pi/4., 0, -3*np.pi/4, 0, np.pi/2, np.pi/4]
+                "initial_qpos": [0, np.pi/8., 0, -5*np.pi/8, 0, np.pi * 3 / 4, np.pi/4]
             }
             for idx in range(num_robots)
         ]
