@@ -141,7 +141,7 @@ class Push(SingleArmEnv):
         gripper_types="default",
         initialization_noise="default",
         table_full_size=(1.6, 1.6, 0.05),
-        table_friction=(0.8, 5e-3, 1e-4),
+        table_friction=(0.7, 5e-3, 1e-4),
         use_camera_obs=True,
         use_object_obs=True,
         reward_scale=1.0,
@@ -331,7 +331,7 @@ class Push(SingleArmEnv):
             friction=[0.6, 0.005, 0.0001],
             solimp=[0.99, 0.99, 0.01],
             solref=[0.01, 1],
-            density=100
+            # density=100
         )
 
         redwood = CustomMaterial(
@@ -355,7 +355,7 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
-            x_range=[0.35, 0.4],
+            x_range=[0.45, 0.5],
             y_range=[-0.05, 0.05],
             rotation=None,
             ensure_object_boundary_in_range=False,
@@ -367,8 +367,8 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
                 name="GoalSampler",
                 mujoco_objects=self.goal,
-                x_range=[0.45, 0.5],
-                y_range=[-0.02, 0.02],
+                x_range=[0.6, 0.6],
+                y_range=[-0.03, 0.03],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,

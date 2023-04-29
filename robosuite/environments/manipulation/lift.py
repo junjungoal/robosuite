@@ -326,9 +326,9 @@ class Lift(SingleArmEnv):
             self.placement_initializer = UniformRandomSampler(
                 name="ObjectSampler",
                 mujoco_objects=self.cube,
-                x_range=[0.4, 0.45],
+                x_range=[0.5, 0.55],
                 y_range=[-0.02, 0.02],
-                rotation=None,
+                rotation=0.,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,
                 # reference_pos=self.table_offset,
