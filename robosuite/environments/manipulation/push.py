@@ -139,9 +139,9 @@ class Push(SingleArmEnv):
         env_configuration="default",
         controller_configs=None,
         gripper_types="default",
-        initialization_noise="default",
+        initialization_noise=None,
         table_full_size=(1.6, 1.6, 0.05),
-        table_friction=(0.7, 5e-3, 1e-4),
+        table_friction=(0.6, 5e-3, 1e-4),
         use_camera_obs=True,
         use_object_obs=True,
         reward_scale=1.0,
@@ -191,7 +191,9 @@ class Push(SingleArmEnv):
         robot_configs = [
             {
                 "gripper_type": gripper_types[idx],
-                "initial_qpos": [0, np.pi/8., 0, -5*np.pi/8, 0, np.pi * 3 / 4, np.pi/4]
+                # "initial_qpos": [0, np.pi/8., 0, -5*np.pi/8, 0, np.pi * 3 / 4, np.pi/4]
+                # "initial_qpos": [0.0, -0.318, 0.0, -2.739, 0.0, 2.421, np.pi/4]
+                "initial_qpos": [0.0, -0.318, 0.0, -2.739, 0.0, np.pi * 3 / 4., np.pi/4]
             }
             for idx in range(num_robots)
         ]
@@ -329,9 +331,9 @@ class Push(SingleArmEnv):
             rgba=[0.4, 0.84, 0.3, 1.],
             material=greenwood,
             friction=[0.6, 0.005, 0.0001],
-            solimp=[0.99, 0.99, 0.01],
-            solref=[0.01, 1],
-            # density=100
+            # solimp=[0.99, 0.99, 0.01],
+            # solref=[0.01, 1],
+            density=800
         )
 
         redwood = CustomMaterial(
@@ -344,8 +346,8 @@ class Push(SingleArmEnv):
         self.goal = CylinderObject(
             name='goal',
             joints=None,
-            size_min=[0.03, 0.001],  # [0.015, 0.015, 0.015],
-            size_max=[0.03, 0.001],  # [0.018, 0.018, 0.018])
+            size_min=[0.04, 0.001],  # [0.015, 0.015, 0.015],
+            size_max=[0.04, 0.001],  # [0.018, 0.018, 0.018])
             material=redwood,
             obj_type='visual',
         )
@@ -477,7 +479,7 @@ class Push(SingleArmEnv):
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def step(self, action):
-        action = np.concatenate([action, np.array([1])])
+        # action = np.concatenate([action, np.array([1])])
         return super().step(action)
 
     def visualize(self, vis_settings):
@@ -506,4 +508,4 @@ class Push(SingleArmEnv):
         cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
         goal_pos = self.sim.data.body_xpos[self.goal_body_id]
         dist = np.linalg.norm(cylinder_pos[:2]-goal_pos[:2])
-        return dist < 0.02
+        return dist < 0.03

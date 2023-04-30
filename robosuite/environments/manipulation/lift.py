@@ -139,7 +139,7 @@ class Lift(SingleArmEnv):
         env_configuration="default",
         controller_configs=None,
         gripper_types="default",
-        initialization_noise="default",
+        initialization_noise=None,
         table_full_size=(1.6, 1.6, 0.05),
         # table_full_size=(0.8, 0.8, 0.05),
         table_friction=(0.8, 5e-3, 1e-4),
@@ -191,7 +191,8 @@ class Lift(SingleArmEnv):
         robot_configs = [
             {
                 "gripper_type": gripper_types[idx],
-                "initial_qpos": [0, np.pi/8., 0, -5*np.pi/8, 0, np.pi * 3 / 4, np.pi/4]
+                # "initial_qpos": [0, np.pi/8., 0, -5*np.pi/8, 0, np.pi * 3 / 4, np.pi/4]
+                "initial_qpos": [0.0, -0.318, 0.0, -2.739, 0.0, np.pi * 3 / 4., np.pi/4]
             }
             for idx in range(num_robots)
         ]

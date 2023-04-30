@@ -197,6 +197,7 @@ class RobotEnv(MujocoEnv):
         # Robot configurations -- update from subclass configs
         if robot_configs is None:
             robot_configs = [{} for _ in range(self.num_robots)]
+
         self.robot_configs = [
             dict(
                 **{
