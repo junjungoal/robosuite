@@ -479,7 +479,7 @@ class Push(SingleArmEnv):
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def step(self, action):
-        # action = np.concatenate([action, np.array([1])])
+        action = np.concatenate([action, np.array([1])])
         return super().step(action)
 
     def visualize(self, vis_settings):
@@ -508,4 +508,4 @@ class Push(SingleArmEnv):
         cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
         goal_pos = self.sim.data.body_xpos[self.goal_body_id]
         dist = np.linalg.norm(cylinder_pos[:2]-goal_pos[:2])
-        return dist < 0.03
+        return dist < 0.04
