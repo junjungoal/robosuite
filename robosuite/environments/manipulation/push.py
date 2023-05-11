@@ -266,8 +266,8 @@ class Push(SingleArmEnv):
             cylinder_pos = self.sim.data.body_xpos[self.cylinder_body_id]
             gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id]
             dist = np.linalg.norm(gripper_site_pos - cylinder_pos)
-            # reaching_reward = 1 - np.tanh(10.0 * dist)
-            reaching_reward = -dist
+            reaching_reward = 1 - np.tanh(10.0 * dist)
+            # reaching_reward = -dist
             reward += reaching_reward
 
             goal_pos = self.sim.data.body_xpos[self.goal_body_id]
@@ -335,6 +335,12 @@ class Push(SingleArmEnv):
             # solref=[0.01, 1],
             density=800
         )
+        # self.cube = BoxObject(
+        #     name="cube",
+        #     size_min=[0.019, 0.019, 0.019],  # [0.015, 0.015, 0.015],
+        #     size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
+        #     material=yellowwood,
+        # )
 
         redwood = CustomMaterial(
             texture="WoodRed",
@@ -358,7 +364,7 @@ class Push(SingleArmEnv):
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
             x_range=[0.45, 0.5],
-            y_range=[-0.05, 0.05],
+            y_range=[-0.1, 0.1],
             rotation=None,
             ensure_object_boundary_in_range=False,
             ensure_valid_placement=True,
@@ -369,8 +375,8 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
                 name="GoalSampler",
                 mujoco_objects=self.goal,
-                x_range=[0.6, 0.6],
-                y_range=[-0.03, 0.03],
+                x_range=[0.6, 0.65],
+                y_range=[-0.1, 0.1],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,
