@@ -10,7 +10,7 @@ from robosuite.wrappers import Wrapper
 DEFAULT_COLOR_ARGS = {
     "geom_names": None,  # all geoms are randomized
     "randomize_local": True,  # sample nearby colors
-    "randomize_material": True,  # randomize material reflectance / shininess / specular
+    "randomize_material": False,  # randomize material reflectance / shininess / specular
     "local_rgb_interpolation": 0.2,
     "local_material_interpolation": 0.3,
     "texture_variations": ["rgb"],  # all texture variation types
@@ -27,14 +27,28 @@ DEFAULT_CAMERA_ARGS = {
     "fovy_perturbation_size": 5.0,
 }
 
+# DEFAULT_LIGHTING_ARGS = {
+#     "light_names": None,  # all lights are randomized
+#     "randomize_position": True,
+#     "randomize_direction": True,
+#     "randomize_specular": False,
+#     "randomize_ambient": False,
+#     "randomize_diffuse": False,
+#     "randomize_active": False,
+#     "position_perturbation_size": 0.1,
+#     "direction_perturbation_size": 0.35,
+#     "specular_perturbation_size": 0.1,
+#     "ambient_perturbation_size": 0.1,
+#     "diffuse_perturbation_size": 0.1,
+# }
 DEFAULT_LIGHTING_ARGS = {
     "light_names": None,  # all lights are randomized
     "randomize_position": True,
     "randomize_direction": True,
-    "randomize_specular": False,
-    "randomize_ambient": False,
-    "randomize_diffuse": False,
-    "randomize_active": False,
+    "randomize_specular": True,
+    "randomize_ambient": True,
+    "randomize_diffuse": True,
+    "randomize_active": True,
     "position_perturbation_size": 0.1,
     "direction_perturbation_size": 0.35,
     "specular_perturbation_size": 0.1,
