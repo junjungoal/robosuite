@@ -350,6 +350,12 @@ class Push(SingleArmEnv):
             size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
             material=yellowwood,
         )
+        # self.cube = BoxObject(
+        #     name="cube",
+        #     size_min=[0.019, 0.019, 0.019],  # [0.015, 0.015, 0.015],
+        #     size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
+        #     material=yellowwood,
+        # )
 
         redwood = CustomMaterial(
             texture="WoodRed",
