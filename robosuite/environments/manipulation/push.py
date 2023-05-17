@@ -405,7 +405,7 @@ class Push(SingleArmEnv):
             mujoco_arena=mujoco_arena,
             mujoco_robots=[robot.robot_model for robot in self.robots],
             mujoco_objects=[self.cylinder, self.goal],
-            # mujoco_objects=self.cylinder,
+            mujoco_objects=self.cylinder,
         )
 
     def _setup_references(self):
