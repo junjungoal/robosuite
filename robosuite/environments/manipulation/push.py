@@ -502,8 +502,7 @@ class Push(SingleArmEnv):
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def step(self, action):
-        # action = np.concatenate([action, np.array([1])])
-        action[-1] = 1.
+        action = np.concatenate([action, np.array([1])])
         return super().step(action)
 
     def visualize(self, vis_settings):
