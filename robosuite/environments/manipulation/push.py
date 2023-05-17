@@ -345,10 +345,13 @@ class Push(SingleArmEnv):
         #     density=800
         # )
         self.cylinder = BoxObject(
-            name="cube",
+            name="cylinder",
             size_min=[0.019, 0.019, 0.019],  # [0.015, 0.015, 0.015],
             size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
             material=yellowwood,
+            density=800,
+            friction=[0.6, 0.005, 0.0001],
+            rgba=[0.95, 0.78, 0.05, 1.],
         )
         # self.cube = BoxObject(
         #     name="cube",
@@ -405,7 +408,6 @@ class Push(SingleArmEnv):
             mujoco_arena=mujoco_arena,
             mujoco_robots=[robot.robot_model for robot in self.robots],
             mujoco_objects=[self.cylinder, self.goal],
-            mujoco_objects=self.cylinder,
         )
 
     def _setup_references(self):
@@ -500,7 +502,8 @@ class Push(SingleArmEnv):
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def step(self, action):
-        action = np.concatenate([action, np.array([1])])
+        # action = np.concatenate([action, np.array([1])])
+        action[-1] = 1.
         return super().step(action)
 
     def visualize(self, vis_settings):
