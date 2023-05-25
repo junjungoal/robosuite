@@ -349,8 +349,8 @@ class Push(SingleArmEnv):
             size_min=[0.019, 0.019, 0.019],  # [0.015, 0.015, 0.015],
             size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
             material=yellowwood,
-            density=800,
-            friction=[0.6, 0.005, 0.0001],
+            # density=600,
+            friction=[0.4, 0.001, 0.0001],
             rgba=[0.95, 0.78, 0.05, 1.],
         )
         # self.cube = BoxObject(
@@ -502,7 +502,8 @@ class Push(SingleArmEnv):
                     self.sim.model.body_quat[self.goal_body_id] = obj_quat
 
     def step(self, action):
-        action = np.concatenate([action, np.array([1])])
+        self.average_action = 0.7 * self.average_action + 0.3 * action
+        action = np.concatenate([self.average_action, np.array([1])])
         return super().step(action)
 
     def visualize(self, vis_settings):

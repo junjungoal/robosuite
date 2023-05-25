@@ -244,6 +244,8 @@ class MujocoEnv(metaclass=EnvMeta):
         # TODO(yukez): investigate black screen of death
         # Use hard reset if requested
 
+        self.average_action = 0
+
         if self.hard_reset and not self.deterministic_reset:
             if self.renderer == "mujoco" or self.renderer == "default":
                 self._destroy_viewer()
