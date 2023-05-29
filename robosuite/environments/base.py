@@ -244,7 +244,7 @@ class MujocoEnv(metaclass=EnvMeta):
         # TODO(yukez): investigate black screen of death
         # Use hard reset if requested
 
-        self.average_action = 0
+        self.average_action = np.zeros(self.robot_action_dim)
 
         if self.hard_reset and not self.deterministic_reset:
             if self.renderer == "mujoco" or self.renderer == "default":

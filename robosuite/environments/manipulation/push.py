@@ -166,6 +166,7 @@ class Push(SingleArmEnv):
         renderer_config=None,
         mount_type=None
     ):
+
         # settings for table top
         self.table_full_size = table_full_size
         self.table_friction = table_friction
@@ -198,6 +199,8 @@ class Push(SingleArmEnv):
             for idx in range(num_robots)
         ]
 
+
+        self.robot_action_dim = 3
 
         super().__init__(
             robots=robots,
@@ -454,6 +457,11 @@ class Push(SingleArmEnv):
                     else np.zeros(3)
                 )
 
+            # modality = 'action'
+            # @sensor(modality=modality)
+            # def ee_action(obs_cache):
+            #     return self.average_action
+
             modality = 'goal'
 
             @sensor(modality=modality)
@@ -533,3 +541,8 @@ class Push(SingleArmEnv):
         goal_pos = self.sim.data.body_xpos[self.goal_body_id]
         dist = np.linalg.norm(cylinder_pos[:2]-goal_pos[:2])
         return dist < 0.04
+
+    def _get_observations(self, force_update=False):
+        observations = super()._get_observations(force_update=force_update)
+        observations['ee_action'] = self.average_action
+        return observations
