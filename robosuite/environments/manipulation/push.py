@@ -349,11 +349,11 @@ class Push(SingleArmEnv):
         # )
         self.cylinder = BoxObject(
             name="cylinder",
-            size_min=[0.019, 0.019, 0.019],  # [0.015, 0.015, 0.015],
-            size_max=[0.022, 0.022, 0.022],  # [0.018, 0.018, 0.018])
+            size_min=[0.02, 0.02, 0.02],  # [0.015, 0.015, 0.015],
+            size_max=[0.02, 0.02, 0.02],  # [0.018, 0.018, 0.018])
             material=yellowwood,
             # density=600,
-            friction=[0.4, 0.001, 0.0001],
+            friction=[0.5, 0.001, 0.0001],
             rgba=[0.95, 0.78, 0.05, 1.],
         )
         # self.cube = BoxObject(
@@ -385,8 +385,8 @@ class Push(SingleArmEnv):
             name="ObjectSampler",
             mujoco_objects=self.cylinder,
             x_range=[0.45, 0.5],
-            y_range=[-0.1, 0.1],
-            rotation=None,
+            y_range=[-0.15, 0.15],
+            rotation=0,
             ensure_object_boundary_in_range=False,
             ensure_valid_placement=True,
             reference_pos=(0, 0, self.table_offset[2]),
@@ -396,8 +396,8 @@ class Push(SingleArmEnv):
         self.placement_initializer.append_sampler(UniformRandomSampler(
                 name="GoalSampler",
                 mujoco_objects=self.goal,
-                x_range=[0.55, 0.6],
-                y_range=[-0.1, 0.1],
+                x_range=[0.55, 0.65],
+                y_range=[-0.15, 0.15],
                 rotation=None,
                 ensure_object_boundary_in_range=False,
                 ensure_valid_placement=True,
