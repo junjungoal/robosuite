@@ -141,7 +141,7 @@ class Push(SingleArmEnv):
         gripper_types="default",
         initialization_noise=None,
         table_full_size=(1.6, 1.6, 0.05),
-        table_friction=(0.6, 5e-3, 1e-4),
+        table_friction=(0.3, 5e-3, 1e-4),
         use_camera_obs=True,
         use_object_obs=True,
         reward_scale=1.0,
@@ -271,14 +271,14 @@ class Push(SingleArmEnv):
             dist = np.linalg.norm(gripper_site_pos - cylinder_pos)
             reaching_reward = 1 - np.tanh(10.0 * dist)
             # reaching_reward = -dist
-            reward += reaching_reward
+            reward += 2 * reaching_reward
 
             goal_pos = self.sim.data.body_xpos[self.goal_body_id]
             obj_dist = np.linalg.norm(cylinder_pos[:2] - goal_pos[:2])
             pushing_reward = 1 - np.tanh(15.0 * dist)
-            reward += 2.5*pushing_reward
+            reward += 5 *pushing_reward
 
-            reward += 3.5 * self._check_success()
+            reward += 7 * self._check_success()
             # dist = np.linalg.norm(cylinder_pos - goal_pos)
             # pushing_reward = 1 - np.tanh(5.0 * obj_dist)
             # reward += 2.5 * pushing_reward * (dist < 0.07)
@@ -349,11 +349,11 @@ class Push(SingleArmEnv):
         # )
         self.cylinder = BoxObject(
             name="cylinder",
-            size_min=[0.02, 0.02, 0.02],  # [0.015, 0.015, 0.015],
-            size_max=[0.02, 0.02, 0.02],  # [0.018, 0.018, 0.018])
+            size_min=[0.025, 0.025, 0.025],  # [0.015, 0.015, 0.015],
+            size_max=[0.025, 0.025, 0.025],  # [0.018, 0.018, 0.018])
             material=yellowwood,
-            # density=600,
-            friction=[0.5, 0.001, 0.0001],
+            density=10,
+            friction=[0.3, 0.001, 0.0001],
             rgba=[0.95, 0.78, 0.05, 1.],
         )
         # self.cube = BoxObject(
