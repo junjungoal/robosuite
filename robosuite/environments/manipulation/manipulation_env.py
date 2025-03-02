@@ -142,6 +142,7 @@ class ManipulationEnv(RobotEnv):
         camera_segmentations=None,
         renderer="mujoco",
         renderer_config=None,
+        obs_in_base_frame=False,
     ):
         # Robot info
         robots = list(robots) if type(robots) is list or type(robots) is tuple else [robots]
@@ -184,6 +185,7 @@ class ManipulationEnv(RobotEnv):
             robot_configs=robot_configs,
             renderer=renderer,
             renderer_config=renderer_config,
+            obs_in_base_frame=obs_in_base_frame
         )
 
     @property

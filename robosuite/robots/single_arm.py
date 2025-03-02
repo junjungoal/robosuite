@@ -287,7 +287,7 @@ class SingleArm(Manipulator):
         """
         self.gripper.set_sites_visibility(sim=self.sim, visible=visible)
 
-    def setup_observables(self):
+    def setup_observables(self, obs_in_base_frame=False):
         """
         Sets up observables to be used for this robot
 
@@ -304,7 +304,12 @@ class SingleArm(Manipulator):
         # eef features
         @sensor(modality=modality)
         def eef_pos(obs_cache):
-            return np.array(self.sim.data.site_xpos[self.eef_site_id])
+            if obs_in_base_frame:
+                #TODO: check
+                return np.array(self.sim.data.site_xpos[self.eef_site_id]) - self.base_pos
+            else:
+                return np.array(self.sim.data.site_xpos[self.eef_site_id])
+
 
         @sensor(modality=modality)
         def eef_quat(obs_cache):

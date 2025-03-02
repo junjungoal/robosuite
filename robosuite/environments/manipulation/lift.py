@@ -164,6 +164,7 @@ class Lift(SingleArmEnv):
         camera_segmentations=None,  # {None, instance, class, element}
         renderer="mujoco",
         renderer_config=None,
+        obs_in_base_frame=False
     ):
         # settings for table top
         self.table_full_size = table_full_size
@@ -205,6 +206,7 @@ class Lift(SingleArmEnv):
             camera_segmentations=camera_segmentations,
             renderer=renderer,
             renderer_config=renderer_config,
+            obs_in_base_frame=obs_in_base_frame
         )
 
     def reward(self, action=None):
@@ -355,7 +357,10 @@ class Lift(SingleArmEnv):
             # cube-related observables
             @sensor(modality=modality)
             def cube_pos(obs_cache):
-                return np.array(self.sim.data.body_xpos[self.cube_body_id])
+                if self.obs_in_base_frame:
+                    return self.robots[0].pose_in_base_from_name(self.cube.root_body)[:3, 3]
+                else:
+                    return np.array(self.sim.data.body_xpos[self.cube_body_id])
 
             @sensor(modality=modality)
             def cube_quat(obs_cache):

@@ -142,6 +142,7 @@ class RobotEnv(MujocoEnv):
         robot_configs=None,
         renderer="mujoco",
         renderer_config=None,
+        obs_in_base_frame=False,
     ):
         # First, verify that correct number of robots are being inputted
         self.env_configuration = env_configuration
@@ -165,6 +166,7 @@ class RobotEnv(MujocoEnv):
 
         # Observations -- Ground truth = object_obs, Image data = camera_obs
         self.use_camera_obs = use_camera_obs
+        self.obs_in_base_frame = obs_in_base_frame
 
         # Camera / Rendering Settings
         self.has_offscreen_renderer = has_offscreen_renderer
@@ -328,7 +330,7 @@ class RobotEnv(MujocoEnv):
         observables = super()._setup_observables()
         # Loop through all robots and grab their observables, adding it to the proprioception modality
         for robot in self.robots:
-            robot_obs = robot.setup_observables()
+            robot_obs = robot.setup_observables(self.obs_in_base_frame)
             observables.update(robot_obs)
 
         # Loop through cameras and update the observations if using camera obs
