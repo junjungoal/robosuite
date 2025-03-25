@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 from robosuite.controllers.base_controller import Controller
 from robosuite.utils.control_utils import *
@@ -101,6 +102,7 @@ class JointPositionController(Controller):
         policy_freq=20,
         qpos_limits=None,
         interpolator=None,
+        control_delta=False,
         **kwargs,  # does nothing; used so no error raised when dict is passed with extra terms used previously
     ):
 
@@ -113,6 +115,8 @@ class JointPositionController(Controller):
 
         # Control dimension
         self.control_dim = len(joint_indexes["joints"])
+
+        self.use_delta = control_delta
 
         # input and output max and min (allow for either explicit lists or single numbers)
         self.input_max = self.nums2array(input_max, self.control_dim)
@@ -178,6 +182,9 @@ class JointPositionController(Controller):
         """
         # Update state
         self.update()
+
+        if not self.use_delta:
+            set_qpos = copy.deepcopy(action)
 
         # Parse action based on the impedance mode, and update kp / kd as necessary
         jnt_dim = len(self.qpos_index)

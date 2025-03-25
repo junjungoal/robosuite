@@ -193,6 +193,7 @@ class PickPlace(SingleArmEnv):
         camera_segmentations=None,  # {None, instance, class, element}
         renderer="mujoco",
         renderer_config=None,
+        obs_in_base_frame=False
     ):
         # task settings
         self.single_object_mode = single_object_mode
@@ -246,6 +247,7 @@ class PickPlace(SingleArmEnv):
             camera_segmentations=camera_segmentations,
             renderer=renderer,
             renderer_config=renderer_config,
+            obs_in_base_frame=obs_in_base_frame
         )
 
     def reward(self, action=None):
@@ -632,7 +634,10 @@ class PickPlace(SingleArmEnv):
 
         @sensor(modality=modality)
         def obj_pos(obs_cache):
-            return np.array(self.sim.data.body_xpos[self.obj_body_id[obj_name]])
+            if self.obs_in_base_frame:
+                return self.robots[0].pose_in_base_from_name(obj_name+'_main')[:3, 3]
+            else:
+                return np.array(self.sim.data.body_xpos[self.obj_body_id[obj_name]])
 
         @sensor(modality=modality)
         def obj_quat(obs_cache):
