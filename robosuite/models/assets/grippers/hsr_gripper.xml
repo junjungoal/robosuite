@@ -1,0 +1,119 @@
+<mujoco model="hsr_gripper">
+    <asset>
+        <mesh name="palm" file="meshes/hsr/hand_v0/palm.stl" />
+        <mesh name="l_proximal" file="meshes/hsr/hand_v0/l_proximal.stl" />
+        <mesh name="l_distal" file="meshes/hsr/hand_v0/l_distal.stl" />
+        <mesh name="r_proximal" file="meshes/hsr/hand_v0/r_proximal.stl" />
+        <mesh name="r_distal" file="meshes/hsr/hand_v0/r_distal.stl" />
+        <material name="hsr_white" rgba="1.0 1.0 1.0 1" />
+    <material name="hsr_black" rgba="0.3 0.3 0.3 1" />
+    </asset>
+    <actuator>
+        <position kp="1000" name="hand_motor_joint" joint="hand_motor_joint" ctrlrange="-0.798 1.24" forcelimited="true" forcerange="-20 20"/>
+        <!-- <position  kp="100" name="gripper_finger_joint1" joint="hand_l_proximal_joint" ctrlrange="-0.798 1.24"/>
+        <position kp="100" name="gripper_finger_joint2" joint="hand_r_proximal_joint" ctrlrange="-0.798 1.24"/> -->
+    </actuator>
+    <!-- <option integrator="implicitfast"/> -->
+    <worldbody>
+             <body name="right_gripper" pos="0.012 0 0.1405" quat="0 0 0 1">
+            <!-- <body name="right_gripper" pos="0.0 0 0." quat="0 0 0 1"> -->
+                <site name="ft_frame" pos="0 0 0" size="0.01 0.01 0.01" rgba="1 0 0 1" type="sphere" group="1"/>
+                <inertial pos="0 0 0" mass="0.15" diaginertia="0.015 0.015 0.015" />
+                <geom type="mesh" mesh="palm" material="hsr_white" group="0" name="palm_collision"/>
+                <geom type="mesh" mesh="palm" material="hsr_white" contype="0" conaffinity="0" group="1" name="palm_visual" />
+                <body name="hand_motor_dummy_link">
+                <inertial pos="0 0 0" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                <joint name="hand_motor_joint" pos="0 0 0" axis="1 0 0" range="-0.798 1.24" actuatorfrcrange="-100 100" damping="20" />
+                </body>
+                
+                <body name="eef" pos="0 0 0.07539" quat="1 0 0 0">
+                    <site name="grip_site" pos="0 0 0" size="0.01 0.01 0.01" rgba="1 0 0 0.5" type="sphere" group="1"/>
+                    <site name="ee_x" pos="0.1 0 0" size="0.005 .1"  quat="0.707105  0 0.707108 0 " rgba="1 0 0 0" type="cylinder" group="1"/>
+                    <site name="ee_y" pos="0 0.1 0" size="0.005 .1" quat="0.707105 0.707108 0 0" rgba="0 1 0 0" type="cylinder" group="1"/>
+                    <site name="ee_z" pos="0 0 0.1" size="0.005 .1" quat="1 0 0 0" rgba="0 0 1 0" type="cylinder" group="1"/>
+                    <!-- This site was added for visualization. -->
+                    <site name="grip_site_cylinder" pos="0 0 0" size="0.005 10" rgba="0 1 0 0.3" type="cylinder" group="1"/>
+                </body>
+
+                <body name="leftfinger" pos="-0.01675 -0.0245 -0.0175">
+                    <inertial pos="0 0 0" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                    <joint name="hand_l_proximal_joint" pos="0 0 0" axis="1 0 0" range="-0.798 1.24" actuatorfrcrange="-100 100" damping="20" />
+                    <body name="hand_l_spring_proximal_link">
+                    <inertial pos="0.021418 0.00248 0.022688" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                    <!-- <joint name="hand_l_spring_proximal_joint" pos="0 0 0" axis="1 0 0" range="0 0.698" actuatorfrcrange="-10 10" damping="0.0001" /> -->
+                    <geom type="mesh" mesh="l_proximal" material="hsr_black" group="0" name='l_proximal_collsion' />
+                    <geom type="mesh" mesh="l_proximal" material="hsr_black" contype="0" conaffinity="0" group="1" name='l_proximal_visual'/>
+                    <body name="hand_l_mimic_distal_link" pos="0 0 0.07">
+                        <inertial pos="0 0 0" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                        <!-- <joint name="hand_l_mimic_distal_joint" pos="0 0 0" axis="1 0 0" range="-0.698 0" actuatorfrcrange="-100 100" damping="0.0001" /> -->
+                        <body name="hand_l_distal_link">
+                        <inertial pos="0.011116 0.005679 0.017532" mass="0.001" diaginertia="0 0 0" />
+                        <!-- <joint name="hand_l_distal_joint" pos="0 0 0" axis="1 0 0" range="-1.24 0.798" actuatorfrcrange="-100 100" damping="0.0001" /> -->
+                        <geom type="mesh" mesh="l_distal" material="hsr_black" group="0" name='l_distal_collision' />
+                        <geom type="mesh" mesh="l_distal" material="hsr_black" contype="0" conaffinity="0" group="1" name='l_distal_visual' />
+
+                        <geom group='0' type="box" size="0.02 0.01 0.0075" pos="0.017 0.005 0.03"
+                                friction="0.7" solimp="0.95 0.99 0.001" solref="0.004 1" conaffinity="1" contype="1" name="hand_l1_pad_collision" />
+                        <geom  group='0' type="box" size="0.02 0.01 0.0075" pos="0.017 0.005 0.015"
+                                friction="0.6" solimp="0.95 0.99 0.001" solref="0.004 1" conaffinity="1" contype="1" name="hand_l2_pad_collision" />
+                        <body name="hand_l_finger_tip_frame" pos="0.01675 0.01865 0.04289" quat="0.707107 -0.707107 0 0">
+                            <inertial pos="0 0 0" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                        </body>
+
+                        <body name="hand_l_finger_vacuum_frame" pos="0.00475 -0.011539 0.03322" quat="0.92388 0.382683 0 0">
+                            <inertial pos="0 0 0" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                        </body>
+                        </body>
+                    </body>
+                    </body>
+                </body>
+                <body name="rightfinger" pos="-0.01675 0.0245 -0.0175">
+                    <inertial pos="0 0 0" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                    <joint name="hand_r_proximal_joint" pos="0 0 0" axis="-1 0 0" range="-0.798 1.24" actuatorfrcrange="-100 100" damping="20" />
+                    <body name="hand_r_spring_proximal_link">
+                    <inertial pos="0.013203 0.002096 0.023311" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                    <!-- <joint name="hand_r_spring_proximal_joint" pos="0 0 0" axis="-1 0 0" range="0 0.698" actuatorfrcrange="-10 10" damping="0.0001" /> -->
+                    <geom type="mesh" mesh="r_proximal" material="hsr_black" group="0" name='r_proximal_collsion' />
+                    <geom type="mesh" mesh="r_proximal" material="hsr_black" contype="0" conaffinity="0" group="1" name='r_proximal_visual' />
+                    <body name="hand_r_mimic_distal_link" pos="0 0 0.07">
+                        <inertial pos="0 0 0" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                        <!-- <joint name="hand_r_mimic_distal_joint" pos="0 0 0" axis="-1 0 0" range="-0.698 0" actuatorfrcrange="-100 100" damping="0.0001" /> -->
+                        <body name="hand_r_distal_link">
+                            <inertial pos="0.014256 -0.008321 0.015591" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                            <!-- <joint name="hand_r_distal_joint" pos="0 0 0" axis="-1 0 0" range="-1.24 0.798" actuatorfrcrange="-100 100" damping="0.0001" /> -->
+                            <geom type="mesh" mesh="r_distal" material="hsr_black" group="0" name='r_distal_collision' />
+                            <geom type="mesh" mesh="r_distal" material="hsr_black" contype="0" conaffinity="0" group="1" name='r_distal_visual'/>
+                            <geom type="box" size="0.02 0.01 0.0075" pos="0.017 -0.005 0.03"
+                                    friction="0.7" solimp="0.95 0.99 0.001" solref="0.004 1" conaffinity="1" contype="1" name="hand_r1_pad_collision" />
+                            <geom type="box" size="0.02 0.01 0.0075" pos="0.017 -0.005 0.015"
+                                    friction="0.6" solimp="0.95 0.99 0.001" solref="0.004 1" conaffinity="1" contype="1" name="hand_r2_pad_collision" />
+                            <body name="hand_r_finger_tip_frame" pos="0.01675 -0.01865 0.04289" quat="0.707107 0.707107 0 0">
+                                <inertial pos="0 0 0" mass="0.001" diaginertia="0.001 0.001 0.001" />
+                            </body>
+                        </body>
+                    </body>
+                    </body>
+                </body>
+                <body name="hand_camera_frame" pos="0.039 0 -0.0045">
+                    <camera name="hand" fovy="62" pos="0 0 0" euler="0 3.1415 1.57"/>
+                    <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                    <body name="hand_camera_gazebo_frame" quat="0.5 0.5 -0.5 0.5">
+                    <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                    </body>
+                </body>
+            </body>
+    </worldbody>
+    <sensor>
+        <force name="force_ee" site="ft_frame"/>
+        <torque name="torque_ee" site="ft_frame"/>
+    </sensor>
+  <equality>
+    <!-- TODO: Disable torso_lift_joint because mimic joint is not supported in the pinocchio library. This will be resolved when you can install pinocchio version 3.5.0 with pip. -->
+    <!-- <joint joint1="arm_lift_joint" joint2="torso_lift_joint" -->
+    <!--        polycoef="0.0 2.0 0 0 0" solimp="0.95 0.99 0.001" solref="0.005 1"/> -->
+    <joint joint1="hand_motor_joint" joint2="hand_l_proximal_joint"
+           polycoef="0 1 0 0 0" solimp="0.95 0.99 0.001" solref="0.005 1"/>
+    <joint joint1="hand_motor_joint" joint2="hand_r_proximal_joint"
+           polycoef="0 1 0 0 0" solimp="0.95 0.99 0.001" solref="0.005 1"/>
+  </equality>
+</mujoco>

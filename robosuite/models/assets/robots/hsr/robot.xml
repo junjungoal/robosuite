@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="hsr">
+  <compiler angle="radian" autolimits="true"/>
+
+  <asset>
+    <mesh name="base" file="meshes/base_v2/base.stl" />
+    <mesh name="laser" file="meshes/sensors/laser.stl" />
+    <mesh name="bumper" file="meshes/base_v2/bumper.stl" />
+    <mesh name="torso" file="meshes//torso_v0/torso.stl" />
+    <mesh name="head_pan" file="meshes/head_v1/head_pan.stl" />
+    <mesh name="head" file="meshes/head_v1/head.stl" />
+    <mesh name="tablet" file="meshes/head_v1/tablet.stl" />
+    <mesh name="xtion" file="meshes/sensors/xtion.stl" />
+    <mesh name="shoulder" file="meshes/arm_v0/shoulder.stl" />
+    <mesh name="arm_flex" file="meshes/arm_v0/arm_flex.stl" />
+    <mesh name="arm_roll" file="meshes/arm_v0/arm_roll.stl" />
+    <mesh name="wrist_roll" file="meshes/wrist_v0/wrist_roll.stl" />
+    <mesh name="palm" file="meshes/hand_v0/palm.stl" />
+    <mesh name="l_proximal" file="meshes/hand_v0/l_proximal.stl" />
+    <mesh name="l_distal" file="meshes/hand_v0/l_distal.stl" />
+    <mesh name="r_proximal" file="meshes/hand_v0/r_proximal.stl" />
+    <mesh name="r_distal" file="meshes/hand_v0/r_distal.stl" />
+
+    <material name="hsr_white" rgba="1.0 1.0 1.0 1" />
+    <material name="hsr_black" rgba="0.3 0.3 0.3 1" />
+  </asset>
+
+    <actuator>
+    <!-- <velocity name="mobile_x_joint" joint="mobile_x_joint" ctrlrange="-1 1" kv="1000"/>
+    <velocity name="mobile_y_joint" joint="mobile_y_joint" ctrlrange="-1 1" kv="1000"/>
+    <velocity name="mobile_theta_joint" joint="mobile_theta_joint" ctrlrange="-1 1" kv="1000"/> -->
+
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="arm_lift_joint" name="torq_j1"/>
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="arm_flex_joint" name="torq_j2"/>
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="arm_roll_joint" name="torq_j3"/>
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="wrist_flex_joint" name="torq_j4"/>
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="wrist_roll_joint" name="torq_j5"/>
+
+  
+    <!-- <position class="hsr" kp="2000" name="arm_lift_joint" joint="arm_lift_joint"/>
+    <position class="hsr" kp="100" name="arm_flex_joint" joint="arm_flex_joint"/>
+    <position class="hsr" kp="10" name="arm_roll_joint" joint="arm_roll_joint"/>
+    <position class="hsr" kp="100" name="wrist_flex_joint" joint="wrist_flex_joint"/>
+    <position class="hsr" kp="10" name="wrist_roll_joint" joint="wrist_roll_joint"/>
+    <position class="hsr" kp="10" name="hand_motor_joint" joint="hand_motor_joint"/> -->
+  </actuator>
+
+
+
+  <worldbody>
+    <body name="base" pos="0 0 0">
+      <body name='base_link'>
+        <site name="right_center" pos="0 0 0" size="0.01" rgba="1 0.3 0.3 1" group="2"/>
+        <body name="torso_lift_link" pos="0 0 0.752">
+          <inertial pos="-0.051142 0.003454 -0.2905" quat="0.511154 0.00760492 -0.0140194 0.859341" mass="3.42078" diaginertia="0.105342 0.104252 0.0127461" />
+          <!-- TODO: Disable torso_lift_joint because mimic joint is not supported in the pinocchio library. This will be resolved when you can install pinocchio version 3.5.0 with pip. -->
+          <!-- <joint name="torso_lift_joint" pos="0 0 0" axis="0 0 1" type="slide" range="0 0.345" actuatorfrcrange="-300 300" damping="500" /> -->
+          <geom type="mesh" mesh="torso" material="hsr_black" pos="1e-3 0 0" name='torso_collsiion' group='0'/>
+          <geom type="mesh" mesh="torso" material="hsr_black" pos="1e-3 0 0" name='torso_visial' contype="0" conaffinity="0" group="1"/>
+          <body name="head_pan_link">
+            <inertial pos="0.001724 -0.001969 -0.028886" quat="0.865343 0.459592 0.192259 -0.0547077" mass="0.571903" diaginertia="0.00102408 0.00077623 0.000589392" />
+            <!-- <joint name="head_pan_joint" pos="0 0 0" axis="0 0 1" range="-3.84 1.75"  damping="1" /> -->
+            <geom type="mesh" mesh="head_pan" material="hsr_white" name='head_pan_collision' group='0'/>
+            <geom type="mesh" mesh="head_pan" material="hsr_white" name='head_pan_visual' contype="0" conaffinity="0" group="1"/>
+            <body name="head_tilt_link" pos="0.02 0 0">
+              <inertial pos="-0.055376 -0.002436 0.117733" quat="0.973833 0.0131235 -0.226864 -0.00327368" mass="2.1238" diaginertia="0.0218915 0.0149823 0.0091862" />
+              <!-- <joint name="head_tilt_joint" pos="0 0 0" axis="0 -1 0" range="-1.57 0.52"  damping="10" /> -->
+              <geom type="mesh" mesh="head" material="hsr_white" name='head_collision' group='0'/>
+              <geom type="mesh" mesh="head" material="hsr_white" name='head_visual' contype="0" conaffinity="0" group="1"/>
+              <geom type="mesh" mesh="tablet" material="hsr_black" pos="1e-3 0 0" name='tablet_collision' group='0'/>
+              <geom type="mesh" mesh="tablet" material="hsr_black" pos="1e-3 0 0" name='tablet_visual' contype="0" conaffinity="0" group="1"/>
+              <body name="head_l_stereo_camera_link" pos="0.02 0.07 0.061" quat="0.5 -0.5 0.5 -0.5">
+                <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                <body name="head_l_stereo_camera_gazebo_frame" quat="0.5 0.5 -0.5 0.5">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                </body>
+              </body>
+              <body name="head_r_stereo_camera_link" pos="0.02 -0.07 0.061" quat="0.5 -0.5 0.5 -0.5">
+                <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                <body name="head_r_stereo_camera_gazebo_frame" quat="0.5 0.5 -0.5 0.5">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                </body>
+              </body>
+              <body name="head_center_camera_frame" pos="0.0195 0 0.061" quat="0.5 -0.5 0.5 -0.5">
+                <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                <body name="head_center_camera_gazebo_frame" quat="0.5 0.5 -0.5 0.5">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                </body>
+              </body>
+              <body name="head_rgbd_sensor_link" pos="-0.079796 0.022 0.215172" quat="0.5 -0.5 0.5 -0.5">
+                <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                <geom type="mesh" mesh="xtion" material="hsr_black" name='xtion_collision' group='0'/>
+                <geom type="mesh" mesh="xtion" material="hsr_black" name='xtion_visual' contype="0" conaffinity="0" group="1"/>
+                <camera name="robotview" fovy="62" pos="0 0 0.08" euler="2.35619 0 0"/>
+                <body name="head_rgbd_sensor_gazebo_frame" quat="0.5 0.5 -0.5 0.5">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+        <body name="arm_lift_link" pos="0 0 0.34">
+          <inertial pos="0.051549 0.042438 -0.064145" quat="-0.111496 0.499152 -0.110462 0.852182" mass="1.27582" diaginertia="0.00909548 0.00799354 0.00328099" />
+          <joint name="arm_lift_joint" pos="0 0 0" axis="0 0 1" type="slide" range="0 0.69" actuatorfrcrange="-300 300" damping="1" />
+          <geom type="mesh" mesh="shoulder" material="hsr_white" name='shoulder_collision' group='0'/>
+          <geom type="mesh" mesh="shoulder" material="hsr_white" name='shoulder_visual' contype="0" conaffinity="0" group="1"/>
+          <body name="arm_flex_link" pos="0.141 0.078 0">
+            <inertial pos="0.000632 0.006404 0.118529" quat="0.99969 -0.008317 0.0017536 -0.0233824" mass="1.33929" diaginertia="0.00752902 0.00710259 0.00155039" />
+            <joint name="arm_flex_joint" pos="0 0 0" axis="0 -1 0" range="-2.62 0"  damping="1" />
+            <geom type="mesh" mesh="arm_flex" material="hsr_white" name='arm_flex_collision' group='0'/>
+            <geom type="mesh" mesh="arm_flex" material="hsr_white" name='arm_flex_visual' contype="0" conaffinity="0" group="1"/>
+            <body name="arm_roll_link" pos="0.005 0 0.345">
+              <inertial pos="-0.006927 0.002039 -0.064837" quat="0.704471 0.707171 -0.0444888 0.0406182" mass="0.247936" diaginertia="0.00426928 0.00411787 0.00078077" />
+              <joint name="arm_roll_joint" pos="0 0 0" axis="0 0 1" range="-2.09 3.84"  damping="0.1" />
+              <geom type="mesh" mesh="arm_roll" material="hsr_white" name='arm_roll_collision' group='0'/>
+              <geom type="mesh" mesh="arm_roll" material="hsr_white" name='arm_roll_visual' contype="0" conaffinity="0" group="1" />
+              <body name="wrist_flex_link">
+                <inertial pos="0.000131 -0.003929 0.00217" quat="0.672298 0.740248 0.0055614 0.00418043" mass="0.681225" diaginertia="7.43604e-05 6.49274e-05 3.81796e-05" />
+                <joint name="wrist_flex_joint" pos="0 0 0" axis="0 -1 0" range="-1.92 1.22"  damping="1" />
+                <geom size="0.017 0.02" pos="0 0 0.03" type="cylinder" rgba="0.33 0.33 0.33 1" material="hsr_black" name='cylinder_collision' group='0'/>
+                <geom size="0.017 0.02" pos="0 0 0.03" type="cylinder" rgba="0.33 0.33 0.33 1" material="hsr_black" name='cylinder_visual' contype="0" conaffinity="0" group="1"/>
+                <body name="wrist_ft_sensor_mount_link">
+                  <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                  <joint name="wrist_roll_joint" pos="0 0 0" axis="0 0 1" range="-1.92 3.67"  damping="1" />
+                  <body name="wrist_ft_sensor_frame" pos="0 0 0.0735" quat="0 1 0 0">
+                    <inertial pos="0 0 0" mass="0.01" diaginertia="0.001 0.001 0.001" />
+                    <!-- <joint name="wrist_ft_sensor_frame_joint" pos="0 0 0" axis="1 0 0"  /> -->
+                    <site name="force_sensor" pos="0 0 0"
+                          type="box" size="0.005 0.005 0.01" rgba="0.6 0.1 0.1 1" group="2"/>
+                    <body name="wrist_roll_link" pos="0 0 0.0735" quat="0 -1 0 0">
+                      <inertial pos="-0.001416 -0.001547 0.081689" quat="0.988073 0.0424396 -0.0351605 -0.143785" mass="0.761692" diaginertia="0.000811657 0.000766039 0.000449422" />
+                      <geom type="mesh" mesh="wrist_roll" material="hsr_white" name='wrist_roll_collision' group='0'/>
+                      <geom type="mesh" mesh="wrist_roll" material="hsr_white" name='wrist_roll_visual' contype="0" conaffinity="0" group="1"/>
+                      
+
+                      <body name='right_hand'>
+                  
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+        </body>
+    </body>
+  </worldbody>
+
+  <!-- <sensor>
+    <force name="force_sensor" site="force_sensor"/>
+    <torque name="torque_sensor" site="force_sensor"/>
+  </sensor> -->
+
+
+  <contact>
+    <exclude body1="base_link" body2="torso_lift_link"/>
+    <exclude body1="base_link" body2="arm_lift_link"/>
+    <exclude body1="base_link" body2="arm_flex_link"/>
+    <exclude body1="torso_lift_link" body2="arm_lift_link"/>
+    <exclude body1="arm_lift_link" body2="arm_flex_link"/>
+  </contact>
+</mujoco>

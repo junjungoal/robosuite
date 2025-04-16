@@ -14,6 +14,7 @@ from .null_mobile_base import NullMobileBase
 from .no_actuation_base import NoActuationBase
 from .floating_legged_base import FloatingLeggedBase
 from .null_base import NullBase
+from .hsr_mobile_base import HSRMobileBase
 from .spot_base import Spot, SpotFloating
 
 BASE_MAPPING = {
@@ -27,6 +28,7 @@ BASE_MAPPING = {
     "Spot": Spot,
     "SpotFloating": SpotFloating,
     "NullBase": NullBase,
+    'HSRMobileBase': HSRMobileBase
 }
 
 ALL_BASES = BASE_MAPPING.keys()

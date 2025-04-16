@@ -57,6 +57,7 @@ if __name__ == "__main__":
     for i in range(10000):
         start = time.time()
         action = np.random.randn(*env.action_spec[0].shape)
+
         obs, reward, done, _ = env.step(action)
         env.render()
 
