@@ -1,0 +1,45 @@
+<mujoco model="omron_mobile_base">
+    <asset>
+        <mesh name="base" file="meshes/hsr_mobile_base/base_v2/base.stl" />
+    <mesh name="laser" file="meshes/hsr_mobile_base/sensors/laser.stl" />
+    <mesh name="bumper" file="meshes/hsr_mobile_base/base_v2/bumper.stl" />
+           <material name="hsr_white" rgba="1.0 1.0 1.0 1" />
+            <material name="hsr_black" rgba="0.3 0.3 0.3 1" />
+    </asset>
+    <actuator>
+    <velocity name="mobile_x_joint" joint="mobile_x_joint" kv="1000" ctrlrange="-1 1" forcelimited="true" forcerange="-600 600"/>
+    <velocity name="mobile_y_joint" joint="mobile_y_joint" kv="1000" ctrlrange="-1 1"  forcerange="-600 600"/>
+    <velocity name="mobile_theta_joint" joint="mobile_theta_joint" kv="1000" ctrlrange="-1 1" forcelimited="true" forcerange="-600 600"/>
+
+	</actuator>
+    <worldbody>
+        <body name="base" pos="0 0 0">
+            <joint name="mobile_x_joint" type="slide" axis="1 0 0" limited="false" damping="0" armature="0.0" frictionloss="250"/>
+            <joint name="mobile_y_joint" type="slide" axis="0 1 0" limited="false" damping="0" armature="0.0" frictionloss="250"/>
+            <joint name="mobile_theta_joint" axis="0 0 1" limited="false" damping="0" armature="0.0" frictionloss="250"/>
+            <inertial pos="-0.025978 -0.005498 0.17633" quat="0.995796 0.0411155 -0.0685908 0.0446655" mass="50" diaginertia="0.378627 0.344913 0.145159" />
+            <geom type="mesh" mesh="base" material="hsr_white" name='base_collision' group="0" friction="1 0 0"/>
+            <geom type="mesh" mesh="base" material="hsr_white" name='base_visual'  contype="0" conaffinity="0" group="1" />
+            <body name="base_f_bumper_link">
+                <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.06" diaginertia="0.001875 0.001437 0.001437" />
+                <!-- <joint name="base_f_bumper_joint" pos="0 0 0" axis="1 0 0" /> -->
+                <geom type="mesh" mesh="bumper" material="hsr_black" name='bumper_f_collision' group='0' friction="1 0 0"/>
+                <geom type="mesh" mesh="bumper" material="hsr_black" name='bumper_f_visual' contype="0" conaffinity="0" group="1"/>
+            </body>
+            <body name="base_b_bumper_link" pos="0 0.0013 0" quat="0 0 0 1">
+                <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.06" diaginertia="0.001875 0.001437 0.001437" />
+                <!-- <joint name="base_b_bumper_joint" pos="0 0 0" axis="1 0 0" /> -->
+                <geom type="mesh" mesh="bumper" material="hsr_black" name='bumper_b_collision' group='0' friction="1 0 0"/>
+                <geom type="mesh" mesh="bumper" material="hsr_black" name='bumper_b_visual' contype="0" conaffinity="0" group="1"/>
+            </body>
+
+            <body name="fixed_support" pos="0 0 0">
+				<!-- <geom name="fixed_support" type="cylinder" pos="0 0 0" size="0.12 0.2 0" group="1"/> -->
+				<body name="support" pos="0 0 0">
+                    <!-- add robot here -->
+                    <site name="center" type="sphere" pos="0 0 0" size="0.01" group="1" rgba="0 0 0 0"/>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>

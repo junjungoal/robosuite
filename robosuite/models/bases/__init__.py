@@ -12,6 +12,7 @@ from .omron_mobile_base import OmronMobileBase
 from .null_mobile_base import NullMobileBase
 from .no_actuation_base import NoActuationBase
 from .floating_legged_base import FloatingLeggedBase
+from .hsr_mobile_base import HSRMobileBase
 
 from .spot_base import Spot, SpotFloating
 
@@ -25,6 +26,7 @@ BASE_MAPPING = {
     "FloatingLeggedBase": FloatingLeggedBase,
     "Spot": Spot,
     "SpotFloating": SpotFloating,
+    'HSRMobileBase': HSRMobileBase
 }
 
 ALL_BASES = BASE_MAPPING.keys()
