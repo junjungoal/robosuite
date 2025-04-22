@@ -4,6 +4,7 @@ from .keyboard import Keyboard
 try:
     from .spacemouse import SpaceMouse
     from .dualsense import DualSense
+    from .dualshock import DualShock
 except ImportError as e:
     print("Exception!", e)
     print(

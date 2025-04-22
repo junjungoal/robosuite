@@ -342,6 +342,15 @@ if __name__ == "__main__":
             pos_sensitivity=args.pos_sensitivity,
             rot_sensitivity=args.rot_sensitivity,
         )
+    elif args.device == "dualshock":
+        from robosuite.devices import DualShock
+
+        device = DualShock(
+            env=env,
+            pos_sensitivity=args.pos_sensitivity,
+            rot_sensitivity=args.rot_sensitivity,
+            reverse_xy=args.reverse_xy,
+        )
     elif args.device == "dualsense":
         from robosuite.devices import DualSense
 

@@ -39,8 +39,12 @@ SPACEMOUSE_VENDOR_ID = 9583
 SPACEMOUSE_PRODUCT_ID = 50734
 
 # DualSense settings. Used by DualSense class in robosuite/devices/dualsense.py
-DUALSENSE_VENDOR_ID = 0x054C
-DUALSENSE_PRODUCT_ID = 0x0CE6
+DUALSENSE_VENDOR_ID = 1356
+DUALSENSE_PRODUCT_ID = 2508
+
+# DualShock settings. Used by DualSense class in robosuite/devices/dualsense.py
+DUALSHOCK_VENDOR_ID = 1356
+DUALSHOCK_PRODUCT_ID = 2508
 
 # If LOGGING LEVEL is set to None, the logger will be turned off
 CONSOLE_LOGGING_LEVEL = "INFO"
