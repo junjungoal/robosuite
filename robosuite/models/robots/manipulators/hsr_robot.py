@@ -32,13 +32,13 @@ class HSR(ManipulatorModel):
     @property
     def init_qpos(self):
         # return np.array([0.25, -2.0, 0.0, -1.0, 0.0])
-        return np.array([0.25, -1.0, 0.0, -1.0, 0.0])
+        return np.array([0.125, 0.25, -1.0, 0.0, -1.0, 0.0])
 
     @property
     def base_xpos_offset(self):
         return {
-            "bins": (-0.5, -0.1, 0.5),
-            "empty": (-0.6, 0, 0.5),
+            "bins": (-0.8, -0.1, 0.),
+            "empty": (0., 0, 0.),
             "table": lambda table_length: (-0.16 - table_length / 2, 0, 0.),
         }
 
