@@ -107,7 +107,7 @@ class MobileBaseJointVelocityController(MobileBaseController):
             actuator_range,
             naming_prefix=kwargs.get("naming_prefix", None),
         )
-
+        
         # Control dimension
         self.control_dim = len(joint_indexes["joints"])
 
