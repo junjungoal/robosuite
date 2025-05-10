@@ -24,10 +24,6 @@
                     "type": "GRIP"
                 }
             }
-        },
-        "base": {
-            "type": "JOINT_VELOCITY",
-            "interpolation": "null"
         }
     }
 }
