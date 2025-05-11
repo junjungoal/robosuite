@@ -19,7 +19,7 @@ class HSR(ManipulatorModel):
 
     @property
     def default_base(self):
-        return "HSRMobileBase"
+        return "NullMount"
 
     @property
     def default_gripper(self):
@@ -31,14 +31,13 @@ class HSR(ManipulatorModel):
 
     @property
     def init_qpos(self):
-        # return np.array([0.25, -2.0, 0.0, -1.0, 0.0])
-        return np.array([0.125, 0.25, -1.0, 0.0, -1.0, 0.0])
+        return np.array([0.0, 0.3, 0.6, 0.0, 0.0, -np.pi/2, 0.0])
 
     @property
     def base_xpos_offset(self):
         return {
             "bins": (-0.8, -0.1, 0.),
-            "empty": (0., 0, 0.),
+            "empty": (0., 0., 0.),
             "table": lambda table_length: (-0.16 - table_length / 2, 0, 0.),
         }
 
