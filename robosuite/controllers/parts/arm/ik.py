@@ -26,7 +26,7 @@ from robosuite.utils.control_utils import *
 from robosuite.utils.ik_utils import IKSolver, get_nullspace_gains
 
 # Dict of supported ik robots
-SUPPORTED_IK_ROBOTS = {"Baxter", "Sawyer", "Panda", "GR1FixedLowerBody"}
+SUPPORTED_IK_ROBOTS = {"Baxter", "Sawyer", "Panda", "GR1FixedLowerBody", 'HSR'}
 
 
 class InverseKinematicsController(JointPositionController):
@@ -216,7 +216,7 @@ class InverseKinematicsController(JointPositionController):
         use_delta: bool = True,
         dpos: Optional[np.ndarray] = None,
         drot: Optional[np.ndarray] = None,
-        Kn: Optional[np.ndarray] = np.array([10.0, 10.0, 10.0, 10.0, 5.0, 5.0, 5.0]),
+        Kn: Optional[np.ndarray] = np.array([10.0, 10.0, 10.0, 10.0]),
         damping_pseudo_inv: float = 0.05,
         Kpos: float = 0.95,
         Kori: float = 0.95,

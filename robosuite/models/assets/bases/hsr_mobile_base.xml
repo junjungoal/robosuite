@@ -5,8 +5,16 @@
     <mesh name="bumper" file="meshes/hsr_mobile_base/base_v2/bumper.stl" />
            <material name="hsr_white" rgba="1.0 1.0 1.0 1" />
             <material name="hsr_black" rgba="0.3 0.3 0.3 1" />
+    <mesh name="torso" file="meshes/hsr_mobile_base/torso_v0/torso.stl" />
+    <mesh name="head_pan" file="meshes/hsr_mobile_base/head_v1/head_pan.stl" />
+    <mesh name="head" file="meshes/hsr_mobile_base/head_v1/head.stl" />
+    <mesh name="tablet" file="meshes/hsr_mobile_base/head_v1/tablet.stl" />
+    <mesh name="xtion" file="meshes/hsr_mobile_base/sensors/xtion.stl" />
+    <mesh name="shoulder" file="meshes/hsr_mobile_base/arm_v0/shoulder.stl" />
+    
     </asset>
     <actuator>
+
     <velocity name="mobile_x_joint" joint="mobile_x_joint" kv="1000" ctrlrange="-1 1" forcelimited="true" forcerange="-600 600"/>
     <velocity name="mobile_y_joint" joint="mobile_y_joint" kv="1000" ctrlrange="-1 1"  forcerange="-600 600"/>
     <velocity name="mobile_theta_joint" joint="mobile_theta_joint" kv="1000" ctrlrange="-1 1" forcelimited="true" forcerange="-600 600"/>
@@ -39,7 +47,11 @@
                     <!-- add robot here -->
                     <site name="center" type="sphere" pos="0 0 0" size="0.01" group="1" rgba="0 0 0 0"/>
                 </body>
+
             </body>
         </body>
     </worldbody>
+
+
+
 </mujoco>

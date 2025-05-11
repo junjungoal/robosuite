@@ -95,7 +95,9 @@ class ManipulatorModel(RobotModel):
     def update_joints(self):
         """internal function to update joint lists"""
         for joint in self.all_joints:
-            if "torso" in joint:
+            if 'dummy' in joint:
+                continue
+            elif "torso" in joint:
                 self.torso_joints.append(joint)
             elif "mobile" in joint:
                 self.base_joints.append(joint)
@@ -103,13 +105,14 @@ class ManipulatorModel(RobotModel):
                 self.head_joints.append(joint)
             elif "leg" in joint:
                 self.legs_joints.append(joint)
-
+        
         for joint in self.all_joints:
             if (
                 joint not in self._base_joints
                 and joint not in self._torso_joints
                 and joint not in self._head_joints
                 and joint not in self._legs_joints
+                and 'dummy' not in joint
             ):
                 self._arms_joints.append(joint)
 

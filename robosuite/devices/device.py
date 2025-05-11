@@ -151,7 +151,7 @@ class Device(metaclass=abc.ABCMeta):
                 torso_ac = np.zeros(1)
 
             ac_dict["base"] = base_ac
-            # ac_dict["torso"] = torso_ac
+            ac_dict["torso"] = torso_ac
             ac_dict["base_mode"] = np.array([1 if base_mode is True else -1])
         else:
             arm_norm_delta = np.concatenate([dpos, drotation])

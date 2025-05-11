@@ -33,6 +33,11 @@ class HSR(ManipulatorModel):
     def init_qpos(self):
         # return np.array([0.25, -2.0, 0.0, -1.0, 0.0])
         return np.array([0.125, 0.25, -1.0, 0.0, -1.0, 0.0])
+        # return np.array([-1.0, 0.0, -1.0, 0.0])
+
+    @property
+    def init_torso_qpos(self):
+        return np.array([0.125])
 
     @property
     def base_xpos_offset(self):

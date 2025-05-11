@@ -1,5 +1,5 @@
 {
-    "type": "BASIC",
+    "type": "HYBRID_MOBILE_BASE",
     "body_parts": {
         "arms": {
             "right": {
@@ -24,6 +24,11 @@
                     "type": "GRIP"
                 }
             }
+        },
+        "torso": {
+            "type": "JOINT_POSITION",
+            "interpolation": "null",
+            "kp": 2000
         },
         "base": {
             "type": "JOINT_VELOCITY",
