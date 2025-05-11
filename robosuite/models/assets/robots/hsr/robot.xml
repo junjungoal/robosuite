@@ -48,6 +48,7 @@
 
   <worldbody>
     <body name="base" pos="0 0 0">
+      <camera mode="fixed" name="agentview" pos="-.7 0 1.4" euler="0 -0.9 -1.57"/>
       <body name='arm_link'>
         <site name="right_center" pos="0 0 0" size="0.01" rgba="1 0.3 0.3 1" group="2"/>
         <joint name="arm_theta_joint" axis="0 0 1" limited="false" damping="0.001" armature="0.0"/>
