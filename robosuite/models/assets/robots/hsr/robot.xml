@@ -30,12 +30,12 @@
     <velocity name="mobile_y_joint" joint="mobile_y_joint" ctrlrange="-1 1" kv="1000"/>
     <velocity name="mobile_theta_joint" joint="mobile_theta_joint" ctrlrange="-1 1" kv="1000"/> -->
 
-    <motor ctrllimited="true" ctrlrange="-100 100" joint="mobile_theta_joint" name="torq_j0"/>
-    <motor ctrllimited="true" ctrlrange="-1000 1000" joint="arm_lift_joint" name="torq_j1" forcelimited="false"/>
-    <motor ctrllimited="true" ctrlrange="-80 80" joint="arm_flex_joint" name="torq_j2"/>
-    <motor ctrllimited="true" ctrlrange="-80 80" joint="arm_roll_joint" name="torq_j3"/>
-    <motor ctrllimited="true" ctrlrange="-80 80" joint="wrist_flex_joint" name="torq_j4"/>
-    <motor ctrllimited="true" ctrlrange="-80 80" joint="wrist_roll_joint" name="torq_j5"/>
+    <motor ctrllimited="true" ctrlrange="-200 200" joint="arm_theta_joint" name="torq_j1"/>
+    <motor ctrllimited="true" ctrlrange="-1000 1000" joint="arm_lift_joint" name="torq_j2" forcelimited="false"/> 
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="arm_flex_joint" name="torq_j3"/>
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="arm_roll_joint" name="torq_j4"/>
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="wrist_flex_joint" name="torq_j5"/>
+    <motor ctrllimited="true" ctrlrange="-80 80" joint="wrist_roll_joint" name="torq_j6"/>
 
   
     <!-- <position class="hsr" kp="2000" name="arm_lift_joint" joint="arm_lift_joint"/>
@@ -48,24 +48,25 @@
 
   <worldbody>
     <body name="base" pos="0 0 0">
-      <body name='base_link'>
-        <joint name="mobile_theta_joint" axis="0 0 1" limited="false" damping="0" armature="0.0" frictionloss="250"/>
-        <inertial pos="-0.025978 -0.005498 0.17633" quat="0.995796 0.0411155 -0.0685908 0.0446655" mass="50" diaginertia="0.378627 0.344913 0.145159" />
+      <body name='arm_link'>
+        <site name="right_center" pos="0 0 0" size="0.01" rgba="1 0.3 0.3 1" group="2"/>
+        <joint name="arm_theta_joint" axis="0 0 1" limited="false" damping="0.001" armature="0.0"/>
+        <inertial pos="-0.025978 -0.005498 0.17633" quat="0.995796 0.0411155 -0.0685908 0.0446655" mass="0.1" diaginertia="0.378627 0.344913 0.145159" />
         <geom type="mesh" mesh="base" material="hsr_white" name='base_collision' group="0" friction="1 0 0"/>
         <geom type="mesh" mesh="base" material="hsr_white" name='base_visual'  contype="0" conaffinity="0" group="1" />
-        <body name="base_f_bumper_link">
+        <body name="arm_f_bumper_link">
           <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.06" diaginertia="0.001875 0.001437 0.001437" />
           <!-- <joint name="base_f_bumper_joint" pos="0 0 0" axis="1 0 0" /> -->
           <geom type="mesh" mesh="bumper" material="hsr_black" name='bumper_f_collision' group='0' friction="1 0 0"/>
           <geom type="mesh" mesh="bumper" material="hsr_black" name='bumper_f_visual' contype="0" conaffinity="0" group="1"/>
         </body>
-        <body name="base_b_bumper_link" pos="0 0.0013 0" quat="0 0 0 1">
+        <body name="arm_b_bumper_link" pos="0 0.0013 0" quat="0 0 0 1">
           <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.06" diaginertia="0.001875 0.001437 0.001437" />
           <!-- <joint name="base_b_bumper_joint" pos="0 0 0" axis="1 0 0" /> -->
           <geom type="mesh" mesh="bumper" material="hsr_black" name='bumper_b_collision' group='0' friction="1 0 0"/>
           <geom type="mesh" mesh="bumper" material="hsr_black" name='bumper_b_visual' contype="0" conaffinity="0" group="1"/>
         </body>
-				<site name="right_center" pos="0 0 0" size="0.01" rgba="1 0.3 0.3 1" group="2"/>
+				
         <body name="torso_lift_link" pos="0 0 0.752">
           <inertial pos="-0.051142 0.003454 -0.2905" quat="0.511154 0.00760492 -0.0140194 0.859341" mass="0.12078" diaginertia="0.105342 0.104252 0.0127461" />
           <!-- TODO: Disable torso_lift_joint because mimic joint is not supported in the pinocchio library. This will be resolved when you can install pinocchio version 3.5.0 with pip. -->
@@ -173,9 +174,9 @@
   </equality>
 
   <contact>
-    <exclude body1="base_link" body2="torso_lift_link"/>
-    <exclude body1="base_link" body2="arm_lift_link"/>
-    <exclude body1="base_link" body2="arm_flex_link"/>
+    <exclude body1="arm_link" body2="torso_lift_link"/>
+    <exclude body1="arm_link" body2="arm_lift_link"/>
+    <exclude body1="arm_link" body2="arm_flex_link"/>
     <exclude body1="torso_lift_link" body2="arm_lift_link"/>
     <exclude body1="arm_lift_link" body2="arm_flex_link"/>
   </contact>

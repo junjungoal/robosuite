@@ -36,7 +36,7 @@ MUJOCO_GPU_RENDERING = True
 
 # Spacemouse settings. Used by SpaceMouse class in robosuite/devices/spacemouse.py
 SPACEMOUSE_VENDOR_ID = 9583
-SPACEMOUSE_PRODUCT_ID = 50734
+SPACEMOUSE_PRODUCT_ID = 50741
 
 # DualSense settings. Used by DualSense class in robosuite/devices/dualsense.py
 DUALSENSE_VENDOR_ID = 1356
